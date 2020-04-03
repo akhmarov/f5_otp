@@ -1,7 +1,7 @@
 # f5_otp
 F5 :: One-Time Password (OTP) application
 
-![F5](docs/f5-logo-rgb.png "F5 logo")![QR](docs/qr-code.png "QR code")
+![F5](f5-logo-rgb.png "F5 logo")![QR](qr-code.png "QR code")
 
 This guide will route you through the OTP installation process for all BIG-IP modules. You need to have LTM+APM provisioned modules on BIG-IP. For greater security it's best to have AFM provisioned module to be able to defend you solution from various attacks.
 

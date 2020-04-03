@@ -36,10 +36,10 @@ You can safely choose another directory services, like Apache Directory Server, 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is "Common"
 3. Go to Local Traffic -> iRules -> iRule List
-4. Add iRule with name "OTP" and paste contents of file "irules/OTP"
-5. Add iRule with name "APM-OTP-Create_irule" and paste contents of file "irules/APM-OTP-Create.irule"
-6. Add iRule with name "APM-OTP-Verify_irule" and paste contents of file "irules/APM-OTP-Verify.irule"
-7. Add iRule with name "LTM-OTP-Verify_irule" and paste contents of file "irules/LTM-OTP-Verify.irule"
+4. Add iRule with name "OTP" and paste contents of file "irules/OTP.tcl"
+5. Add iRule with name "APM-OTP-Create_irule" and paste contents of file "irules/APM-OTP-Create.tcl"
+6. Add iRule with name "APM-OTP-Verify_irule" and paste contents of file "irules/APM-OTP-Verify.tcl"
+7. Add iRule with name "LTM-OTP-Verify_irule" and paste contents of file "irules/LTM-OTP-Verify.tcl"
 
 ### iRules LX
 
@@ -48,9 +48,9 @@ You can safely choose another directory services, like Apache Directory Server, 
 3. Go to System -> Resource Provisioning and check that "iRules Language Extensions (iRulesLX)" is licensed and provisioned. If not you have to enable it. Remeber that module reprovision may disrupt traffic processing on BIG-IP
 4. Go to Local Traffic -> iRules -> LX Workspaces
 5. Add new workspace with name "LDAP-Modify_space"
-6. Add iRule with name "APM-LDAP-Modify_irule" and paste contents of file "irulelx/APM-LDAP-Modify.irule"
+6. Add iRule with name "APM-LDAP-Modify_irule" and paste contents of file "irulelx/APM-LDAP-Modify.tcl"
 7. Add extension with name "APM-LDAP-Modify_ilx"
-8. Replace contents of file "index.js" with contents of file "irulelx/APM-LDAP-Modify.ilx"
+8. Replace contents of file "index.js" with contents of file "irulelx/APM-LDAP-Modify.js"
 9. Log in to BIG-IP CLI as user with Administrator privileges
 10. Switch to advanced shell
 11. Execute command "cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/"

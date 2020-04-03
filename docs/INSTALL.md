@@ -1,6 +1,10 @@
 # f5_otp
 F5 :: One-Time Password (OTP) application
 
+![F5](docs/f5-logo-rgb.png "F5 logo")![QR](docs/qr-code.png "QR code")
+
+This guide will route you through the OTP installation process for all BIG-IP modules. You need to have LTM+APM provisioned modules on BIG-IP. For greater security it's best to have AFM provisioned module to be able to defend you solution from various attacks.
+
 ## Installation Contents
 1. Create Active Directory objects
 2. Create BIG-IP iRules
@@ -22,12 +26,12 @@ To use Active Directory as a backend storage for encrypted OTP secret value you 
 6. LDAP attribure. Name of the Active Directory attribure to store encrypted OTP secret value. Standard implementation uses attribute name "extensionAttribute2", but you are free to choose another one. Selected attribute must be available for read/write operations for LDAP administrator
 
 Example:
-1. ldap://
-2. corp.domain.tld
-3. 389
-4. DN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=domain,DC=tld
-5. COMPLEX_PASSWORD_STRING
-6. extensionAttribute2
+* ldap://
+* corp.domain.tld
+* 389
+* DN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=domain,DC=tld
+* COMPLEX_PASSWORD_STRING
+* extensionAttribute2
 
 You can safely choose another directory services, like Apache Directory Server, OpenLDAP or other software. In the core this solution uses NPM package ldapjs which is compatible with any directory service with LDAP enabled access
 
@@ -95,8 +99,8 @@ Use free diagram editor draw.io to open files like *.draw. If you cannot use thi
 17. Select "/Common/APM-OTP-Create_irule", "/Common/APM-OTP-Verify_irule" and "/Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule" from "iRules"
 
 TMSH commands:
-create ltm virtual /PARTITION/APM-OTP-Create_redir_vs { destination /PARTITION/192.0.2.1:http ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp { } http { } } rules { _sys_https_redirect } }
-create ltm virtual /PARTITION/APM-OTP-Create_vs { destination /PARTITION/192.0.2.1:https ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp {} http {} PFS_clientssl { context clientside } } rules { APM-OTP-Create_irule APM-OTP-Verify_irule LDAP-Modify_plugin/APM-LDAP-Modify_irule } }
+`create ltm virtual /PARTITION/APM-OTP-Create_redir_vs { destination /PARTITION/192.0.2.1:http ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp { } http { } } rules { _sys_https_redirect } }`
+`create ltm virtual /PARTITION/APM-OTP-Create_vs { destination /PARTITION/192.0.2.1:https ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp {} http {} PFS_clientssl { context clientside } } rules { APM-OTP-Create_irule APM-OTP-Verify_irule LDAP-Modify_plugin/APM-LDAP-Modify_irule } }`
 
 ### APM HTTP AAA
 
@@ -123,7 +127,7 @@ security_delay %{session.custom.otp.security_delay}
 10. Add "200 OK" to "Successful Logon Detection Match Value"
 
 TMSH command:
-create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://192.0.2.2/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }
+`create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://192.0.2.2/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }`
 
 ### OTP-LTM virtual server
 
@@ -137,7 +141,7 @@ create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http:
 8. Select "/Common/LTM-OTP-Verify_irule" from "iRules"
 
 TMSH command:
-create ltm virtual LTM-OTP-Verify_vs { destination 192.0.2.2:http ip-protocol tcp mask 255.255.255.255 profiles { tcp { } http { } } rules { LTM-OTP-Verify_irule } }
+`create ltm virtual LTM-OTP-Verify_vs { destination 192.0.2.2:http ip-protocol tcp mask 255.255.255.255 profiles { tcp { } http { } } rules { LTM-OTP-Verify_irule } }`
 
 ### Upload encryption key
 1. Prepare encryption key file in format compatible with AES::decrypt command. This step is crucial because current key stored in file is public and unsafe. Please change it in your environment

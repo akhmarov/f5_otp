@@ -1,7 +1,7 @@
 # f5_otp
 F5 :: One-Time Password (OTP) application
 
-![F5](f5-logo-rgb.png =300x300 "F5 logo")![QR](qr-code.png =300x300 "QR code")
+![F5](f5-logo-rgb.png) ![QR](qr-code.png)
 
 This guide will route you through the OTP installation process for all BIG-IP modules. You need to have LTM+APM provisioned modules on BIG-IP. For greater security it's best to have AFM provisioned module to be able to defend you solution from various attacks.
 
@@ -40,7 +40,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
 3. Go to *Local Traffic -> iRules -> iRule List*
-4. Add iRule with name **OTP** and paste contents of file **irules/OTP.tc**
+4. Add iRule with name **OTP** and paste contents of file **irules/OTP.tcl**
 5. Add iRule with name **APM-OTP-Create_irule** and paste contents of file **irules/APM-OTP-Create.tcl**
 6. Add iRule with name **APM-OTP-Verify_irule** and paste contents of file **irules/APM-OTP-Verify.tcl**
 7. Add iRule with name **LTM-OTP-Verify_irule** and paste contents of file **irules/LTM-OTP-Verify.tcl**
@@ -52,18 +52,18 @@ You can safely choose another directory services, like Apache Directory Server, 
 3. Go to *System -> Resource Provisioning* and check that **iRules Language Extensions (iRulesLX)** is licensed and provisioned. If not you have to enable it. Remeber that module reprovision may disrupt traffic processing on BIG-IP
 4. Go to *Local Traffic -> iRules -> LX Workspaces*
 5. Add new workspace with name **LDAP-Modify_space**
-6. Add iRule with name **APM-LDAP-Modify_irule** and paste contents of file **irulelx/APM-LDAP-Modify.tcl**
+6. Add iRule with name **APM-LDAP-Modify_irule** and paste contents of file **iruleslx/APM-LDAP-Modify.tcl**
 7. Add extension with name **APM-LDAP-Modify_ilx**
-8. Replace contents of file **index.js** with contents of file **irulelx/APM-LDAP-Modify.js**
+8. Replace contents of file **index.js** with contents of file **iruleslx/APM-LDAP-Modify.js**
 9. Log in to BIG-IP CLI as user with Administrator privileges
-10. Switch to advanced shell
-11. Execute command **cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/**
-12. Execute command **npm install ldapjs --no-bin-links**
+10. Execute command `bash`
+11. Execute command `cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/`
+12. Execute command `npm install ldapjs --no-bin-links`
 13. Log in to BIG-IP GUI as user with Administrator privileges
 14. Check that current partition is **Common**
 15. Go to *Local Traffic -> iRules -> LX Pugins*
 16. Add new plugin with name **LDAP-Modify_plugin**
-17. Select **ilx-extension** from **Log Publisher** and **LDAP-Modify_space** from **From Workspace**. More about **ilx-extension** may be found in Jason Rahm's article on DevCentral https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941
+17. Select **ilx-extension** from **Log Publisher** and **LDAP-Modify_space** from **From Workspace**. More about **ilx-extension** may be found in **Jason Rahm's** [article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
 
 ### APM Policy
 
@@ -100,7 +100,7 @@ Use free diagram editor draw.io to open files with **draw** extension. If you ca
 
 TMSH commands:
 ```
-create ltm virtual /PARTITION/APM-OTP-Create_redir_vs { destination /PARTITION/192.0.2.1:http ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp { } http { } } rules { _sys_https_redirect } }`
+create ltm virtual /PARTITION/APM-OTP-Create_redir_vs { destination /PARTITION/192.0.2.1:http ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp { } http { } } rules { _sys_https_redirect } }
 create ltm virtual /PARTITION/APM-OTP-Create_vs { destination /PARTITION/192.0.2.1:https ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp {} http {} PFS_clientssl { context clientside } } rules { APM-OTP-Create_irule APM-OTP-Verify_irule LDAP-Modify_plugin/APM-LDAP-Modify_irule } }
 ```
 

@@ -1,15 +1,19 @@
-# f5_otp
+# Installation Guide
 F5 :: One-Time Password (OTP) application
 
-![F5](f5-logo.png) ![QR](qr-code.png)
+This manual will guide you through the OTP application installation process on F5 BIG-IP appliance. You need to have LTM and APM provisioned modules on your BIG-IP. For greater security it is better to have AFM provisioned module to be able to defend various attacks. You also need to have Active Directory and SMTP server.
 
-This manual will guide you through the OTP installation process for all BIG-IP modules. You need to have LTM+APM provisioned modules on BIG-IP. For greater security it's best to have AFM provisioned module to be able to defend you solution from various attacks.
+OTP Application consists of:
+* OTP configuration portal used for creation and modification of assigned OTP token
+* OTP-LTM virtual server used for BIG-IP applications that do not support APM iRule Events (like VMware Horizon View)
 
-## Installation Contents
-1. Create required external objects
+---
+
+## Contents
+1. Create external objects
 2. Create BIG-IP iRules
 3. Create BIG-IP iRules LX
-4. Create LTM SMTP objects
+4. Create TMOS SMTP objects
 5. Create APM Active Directory AAA object
 6. Create APM policy
 7. Create OTP-APM virtual server
@@ -17,7 +21,7 @@ This manual will guide you through the OTP installation process for all BIG-IP m
 9. Create OTP-LTM virtual server
 10. Upload encryption key
 
-### Required external objects
+### Create external objects
 
 1. BIG-IP partition. Tenant that will be used to deploy application. Standard impementation using scheme *Active Directory domain = BIG-IP partition*
 2. LDAP scheme. Valid value is **ldap://** or **ldaps://**. First one is recommended to use because second one leads to strange errors which are sourced from ldapjs npm package
@@ -44,16 +48,16 @@ Example:
 * extensionAttribute2
 * CN=OTP_Allow,OU=Service Groups,DC=corp,DC=domain,DC=tld
 * smtp.domain.tld
-* bigipsmtpuser@domain.tld
+* bigipsmtpuser\@domain.tld
 * COMPLEX_SMTP_PASSWORD_STRING
-* bigipadmins@domain.tld
-* noreply@domain.tld
+* bigipadmins\@domain.tld
+* noreply\@domain.tld
 * bigipaddsadminuser
 * COMPLEX_ADDS_PASSWORD_STRING
 
 You can safely choose another directory services, like Apache Directory Server, OpenLDAP or other software. In the core this solution uses NPM package ldapjs which is compatible with any directory service with LDAP enabled access
 
-### iRules
+### Create BIG-IP iRules
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
@@ -63,7 +67,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 6. Add iRule with name **APM-OTP-Verify_irule** and paste contents of file **irules/APM-OTP-Verify.tcl**
 7. Add iRule with name **LTM-OTP-Verify_irule** and paste contents of file **irules/LTM-OTP-Verify.tcl**
 
-### iRules LX
+### Create BIG-IP iRules LX
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
@@ -81,9 +85,9 @@ You can safely choose another directory services, like Apache Directory Server, 
 14. Check that current partition is **Common**
 15. Go to *Local Traffic -> iRules -> LX Pugins*
 16. Add new plugin with name **LDAP-Modify_plugin**
-17. Select **ilx-extension** from **Log Publisher** and **LDAP-Modify_space** from **From Workspace**. More about **ilx-extension** may be found in **Jason Rahm's** [article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
+17. Select **ilx-extension** from **Log Publisher** and **LDAP-Modify_space** from **From Workspace**. More about **ilx-extension** may be found in [Jason Rahm's article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
 
-### LTM SMTP
+### Creatae TMOS SMTP objects
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
@@ -100,7 +104,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 13. Add **BIGIP_HOSTNAME** to **Local Host Name**
 14. Add **BIGIP_HOSTNAME@domain.tld** to **From Address**
 
-### APM Active Directory AAA
+### Create APM Active Directory AAA object
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
@@ -115,7 +119,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 11. Add **COMPLEX_ADDS_PASSWORD_STRING** to **Admin Password**
 12. Add **COMPLEX_ADDS_PASSWORD_STRING** to **Verify Admin Password**
 
-### APM Policy
+### Create APM Policy
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
@@ -126,9 +130,14 @@ You can safely choose another directory services, like Apache Directory Server, 
 7. Select **All** from **Profile Type**
 8. Use Visual Policy Editor to apply Access Policy as described in **vpe/APM-OTP-Create_access.draw** and **vpe/APM-OTP-Create_access.txt**
 
-Use free diagram editor draw.io to open files with **draw** extension. If you cannot use this software you can take a look at VPE screenshots **vpe/*.png**
+Use free diagram editor draw.io to open files with **draw** extension
+If you cannot use this software you can take a look at VPE screenshots **vpe/*.png** below
 
-### OTP-APM virtual server
+![Policy](../vpe/1_policy.png)
+![Macro1](../vpe/2_macro.png)
+![Macro2](../vpe/3_macro.png)
+
+### Create OTP-APM virtual server
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is **Common**
@@ -154,7 +163,7 @@ create ltm virtual /PARTITION/APM-OTP-Create_redir_vs { destination /PARTITION/1
 create ltm virtual /PARTITION/APM-OTP-Create_vs { destination /PARTITION/192.0.2.1:https ip-protocol tcp mask 255.255.255.255 partition PARTITION profiles { tcp {} http {} PFS_clientssl { context clientside } } rules { APM-OTP-Create_irule APM-OTP-Verify_irule LDAP-Modify_plugin/APM-LDAP-Modify_irule } }
 ```
 
-### APM HTTP AAA
+### Create APM HTTP AAA object
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is "Common"
@@ -185,7 +194,7 @@ TMSH command:
 create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://192.0.2.2/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }
 ```
 
-### OTP-LTM virtual server
+### Create OTP-LTM virtual server
 
 1. Log in to BIG-IP GUI as user with Administrator privileges
 2. Check that current partition is "Common"

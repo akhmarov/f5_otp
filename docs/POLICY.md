@@ -19,18 +19,12 @@ This is a description of each element in Visual Policy Editor (VPE) which need t
 
 ![Policy](../pics/install_vpe1.png)
 
-**Endings**
-
-Name = `Redirect`
-
-Type = Redirect [default]
-
-Color = #3
-
-Url = `https://otp.contoso.com/`
-
-Close session after redirect = Enabled
-
+**Endings**  
+Name = `Redirect`  
+Type = Redirect [default]  
+Color = #3  
+Url = `https://otp.contoso.com/`  
+Close session after redirect = Enabled  
 
 **Need Update**
 Type = Decision Box

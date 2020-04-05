@@ -17,7 +17,7 @@ This solution is based on:
 ## Requirements
 
 Required systems for this application:
-* BIG-IP LTM + APM (*)
+* BIG-IP LTM + APM + iRulesLX (*)
 * Active Directory
 * SMTP server
 * OTP-compatible application

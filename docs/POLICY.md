@@ -50,25 +50,44 @@ Link = `Attach Token`
 
 ![Macro1](../pics/install_vpe2.png)
 
+**Terminals**  
+Name = `Success`  
+Type = -  
+Color = #1  
+Name = `Fail`  
+Type = default  
+Color = #2  
+
 **LDAP Config**  
 Type = Variable Assign  
-session.custom.ldap.bind_scheme = `return {ldap://}`  
-session.custom.ldap.bind_fqdn = `return {corp.contoso.com}`  
-session.custom.ldap.bind_port = `return {389}`  
-session.custom.ldap.bind_dn = `return {CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com}`  
-session.custom.ldap.bind_pwd = `return {COMPLEX_2FA_PASSWORD_STRING}` [Secure]  
-session.custom.ldap.user_dn = AAA dn  
-session.custom.ldap.user_attr = `return {extensionAttribute2}`  
-session.custom.ldap.user_value = `mcget -nocache {session.custom.otp.secret_value}`  
+`session.custom.ldap.bind_scheme` = `return {ldap://}`  
+`session.custom.ldap.bind_fqdn` = `return {corp.contoso.com}`  
+`session.custom.ldap.bind_port` = `return {389}`  
+`session.custom.ldap.bind_dn` = `return {CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com}`  
+`session.custom.ldap.bind_pwd` = `return {COMPLEX_2FA_PASSWORD_STRING}` [Secure]  
+`session.custom.ldap.user_dn` = AAA dn  
+`session.custom.ldap.user_attr` = `return {extensionAttribute2}`  
+`session.custom.ldap.user_value` = `mcget -nocache {session.custom.otp.secret_value}`  
 
 **LDAP Modify**  
 Type = iRule Event  
 ID = `ldap_modify`  
-Successful = `expr {[mcget -nocache {session.custom.ldap.modify_result}] == 0}`  
+`Successful` = `expr {[mcget -nocache {session.custom.ldap.modify_result}] == 0}`  
 
 ### AD Verify
 
 ![Macro2](../pics/install_vpe3.png)
+
+**Terminals**  
+Name = `OTP Enabled`  
+Type = -  
+Color = #1  
+Name = `OTP Missing`  
+Type = -  
+Color = #3  
+Name = `Fail`  
+Type = default  
+Color = #2  
 
 **Browser Logon**  
 Type = Logon Page  
@@ -96,6 +115,11 @@ Link = `Exit`
 ### Notify Admin
 
 ![Macro3](../pics/install_vpe4.png)
+
+**Terminals**  
+Name = `Out`  
+Type = default  
+Color = #1  
 
 **Email**  
 Type = Email  
@@ -125,6 +149,11 @@ Link = `Exit`
 
 ![Macro4](../pics/install_vpe5.png)
 
+**Terminals**  
+Name = `Out`  
+Type = default  
+Color = #1  
+
 **Email**  
 Type = Email  
 SMTP Configuration = **/Common/CONTOSO-Unauthenticated_smtp**  
@@ -142,32 +171,45 @@ Link = `Exit`
 
 ![Macro5](../pics/install_vpe6.png)
 
+**Terminals**  
+Name = `Out`  
+Type = default  
+Color = #1  
+
 **OTP Config**  
 Type = Variable Assign  
-session.custom.otp.secret_value = AAA extensionAttribute2  
-session.custom.otp.secret_keyfile = `return {/CONTOSO/otpenc-key}`  
-session.custom.otp.secret_hmac = `return {sha1}`  
-session.custom.otp.otp_numdig = `return {6}`  
-session.custom.otp.timestep_value = `return {30}`  
-session.custom.otp.timestep_num = `return {1}`  
-session.custom.otp.user_name = AAA sAMAccountName  
-session.custom.otp.user_mail = AAA mail  
-session.custom.otp.security_attempt = `return {3}`  
-session.custom.otp.security_period = `return {60}`  
-session.custom.otp.security_delay = `return {300}`  
+`session.custom.otp.secret_value` = AAA extensionAttribute2  
+`session.custom.otp.secret_keyfile` = `return {/CONTOSO/otpenc-key}`  
+`session.custom.otp.secret_hmac` = `return {sha1}`  
+`session.custom.otp.otp_numdig` = `return {6}`  
+`session.custom.otp.timestep_value` = `return {30}`  
+`session.custom.otp.timestep_num` = `return {1}`  
+`session.custom.otp.user_name` = AAA sAMAccountName  
+`session.custom.otp.user_mail` = AAA mail  
+`session.custom.otp.security_attempt` = `return {3}`  
+`session.custom.otp.security_period` = `return {60}`  
+`session.custom.otp.security_delay` = `return {300}`  
 
 ### OTP Create
 
 ![Macro6](../pics/install_vpe7.png)
 
+**Terminals**  
+Name = `Success`  
+Type = -  
+Color = #1  
+Name = `Fail`  
+Type = default  
+Color = #2  
+
 **OTP Create**  
 Type = iRule Event  
 ID = `otp_create`  
-Successful = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 0}`  
+`Successful` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 0}`  
 
 **QR Create**  
 Type = Variable Assign  
-session.custom.otp.qr_img = Paste contents of [qrcode.tcl](../ifiles/qrcode.tcl) file  
+`session.custom.otp.qr_img` = Paste contents of [qrcode.tcl](../ifiles/qrcode.tcl) file  
 
 **QR Display**  
 Type = Message Box  
@@ -183,28 +225,36 @@ Link = `Verify`
 
 ![Macro7](../pics/install_vpe8.png)
 
+**Terminals**  
+Name = `Success`  
+Type = -  
+Color = #1  
+Name = `Fail`  
+Type = default  
+Color = #2  
+
 **Browser OTP**  
 Type = Logon Page  
-Type = text; Post Variable Name = `otp_value`; Session Variable Name = `otp_value`  
-Type = **none**; Post Variable Name = password; Session Variable Name = password  
+Variable Type = text; Post Variable Name = `otp_value`; Session Variable Name = `otp_value`  
+Variable Type = **none**; Post Variable Name = password; Session Variable Name = password  
 Form Header Text = `Secure Logon`  
 Logon Page Input Field #1 = `One-Time Password`  
 Logon Button = `Submit`  
 
 **Check OTP Length**  
 Type = Empty  
-Equal = `expr {[string length [mcget {session.logon.last.otp_value}]] == [mcget {session.custom.otp.otp_numdig}]}`  
+`Equal` = `expr {[string length [mcget {session.logon.last.otp_value}]] == [mcget {session.custom.otp.otp_numdig}]}`  
 
 **OTP Store**  
 Type = Variable Assign  
-session.custom.otp.otp_value = SESSION session.logon.last.otp_value  
+`session.custom.otp.otp_value` = SESSION session.logon.last.otp_value  
 
 **OTP Verify**  
 Type = iRule Event  
 ID = `otp_verify`  
-Successful = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 0}`  
-Locked User = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 2}`  
-Failed Code = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 3}`  
+`Successful` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 0}`  
+`Locked User` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 2}`  
+`Failed Code` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 3}`  
 
 **Browser Locked**  
 Type = Message Box  

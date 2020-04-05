@@ -7,24 +7,30 @@ This is a description of each element in Visual Policy Editor (VPE) which need t
 ## Contents
 1. Policy
 2. Macro
- 1. Macro AD Modify
- 2. Macro AD Verify
- 3. Macro Notify Admin
- 4. Macro Notify User
- 5. Macro OTP Assign
- 6. Macro OTP Create
- 7. Macro OTP Verify
+   * AD Modify
+   * AD Verify
+   * Notify Admin
+   * Notify User
+   * OTP Assign
+   * OTP Create
+   * OTP Verify
 
 ## Policy
 
 ![Policy](../pics/install_vpe1.png)
 
 **Endings**
+
 Name = `Redirect`
+
 Type = Redirect [default]
+
 Color = #3
+
 Url = `https://otp.contoso.com/`
+
 Close session after redirect = Enabled
+
 
 **Need Update**
 Type = Decision Box

@@ -142,6 +142,10 @@ You also need to know that users in you directory services catalog must have val
 ![Macro1](../pics/install_vpe2.png)
 ![Macro2](../pics/install_vpe3.png)
 ![Macro3](../pics/install_vpe4.png)
+![Macro4](../pics/install_vpe5.png)
+![Macro5](../pics/install_vpe6.png)
+![Macro6](../pics/install_vpe7.png)
+![Macro7](../pics/install_vpe8.png)
 
 ## Create OTP-APM virtual server
 

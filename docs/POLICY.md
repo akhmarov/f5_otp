@@ -46,9 +46,9 @@ Link = `Attach Token`
 
 ## Macro
 
-![Macro1](../pics/install_vpe2.png)
-
 ### AD Modify
+
+![Macro1](../pics/install_vpe2.png)
 
 **LDAP Config**  
 Type = Variable Assign  
@@ -67,6 +67,8 @@ ID = `ldap_modify`
 Successful = `expr {[mcget -nocache {session.custom.ldap.modify_result}] == 0}`  
 
 ### AD Verify
+
+![Macro2](../pics/install_vpe3.png)
 
 **Browser Logon**  
 Type = Logon Page  
@@ -91,9 +93,9 @@ Type = Message Box
 Message = `You are not allowed to use this service. Please contact your system administrator`  
 Link = `Exit`  
 
-![Macro2](../pics/install_vpe3.png)
-
 ### Notify Admin
+
+![Macro3](../pics/install_vpe4.png)
 
 **Email**  
 Type = Email  
@@ -121,6 +123,8 @@ Link = `Exit`
 
 ### Notify User
 
+![Macro4](../pics/install_vpe5.png)
+
 **Email**  
 Type = Email  
 SMTP Configuration = **/Common/CONTOSO-Unauthenticated_smtp**  
@@ -134,9 +138,9 @@ Type = Message Box
 Message = `One-Time Password (OTP) authentication token was successfully updated`  
 Link = `Exit`  
 
-![Macro3](../pics/install_vpe4.png)
-
 ### OTP Assign
+
+![Macro5](../pics/install_vpe6.png)
 
 **OTP Config**  
 Type = Variable Assign  
@@ -153,6 +157,8 @@ session.custom.otp.security_period = `return {60}`
 session.custom.otp.security_delay = `return {300}`  
 
 ### OTP Create
+
+![Macro6](../pics/install_vpe7.png)
 
 **OTP Create**  
 Type = iRule Event  
@@ -174,6 +180,8 @@ Message =
 Link = `Verify`  
 
 ### OTP Verify
+
+![Macro7](../pics/install_vpe8.png)
 
 **Browser OTP**  
 Type = Logon Page  

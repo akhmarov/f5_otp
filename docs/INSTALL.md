@@ -3,9 +3,9 @@ F5 :: One-Time Password (OTP) application
 
 This manual will guide you through the OTP application installation process on F5 BIG-IP appliance. You need to have LTM and APM provisioned modules on your BIG-IP. For greater security it is better to have AFM provisioned module to be able to defend various attacks. You also need to have Active Directory and SMTP server.
 
-OTP Application consists of:
+OTP application consists of:
 * OTP configuration portal used for creation and modification of assigned OTP token
-* OTP-LTM virtual server used for BIG-IP applications that do not support APM iRule Events (like VMware Horizon View)
+* OTP-LTM virtual server used for BIG-IP applications that do not support APM iRule Events (like VMware Horizon Client)
 
 ---
 
@@ -128,10 +128,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 5. Go to *Access -> Profiles / Policies -> Access Profiles (Per-Session Policies)*
 6. Add new policy with name **APM-OTP-Create_access**
 7. Select **All** from **Profile Type**
-8. Use Visual Policy Editor to apply Access Policy as described in **vpe/APM-OTP-Create_access.draw** and **vpe/APM-OTP-Create_access.txt**
-
-Use free diagram editor draw.io to open files with **draw** extension
-If you cannot use this software you can take a look at VPE screenshots **vpe/*.png** below
+8. Use Visual Policy Editor to apply Access Policy as described below and in file **vpe/VPE_ITEMS.txt**
 
 ![Policy](../vpe/1_policy.png)
 ![Macro1](../vpe/2_macro.png)

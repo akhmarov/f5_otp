@@ -70,10 +70,10 @@ You also need to know that users in you directory services catalog must have val
 1. Log in to BIG-IP GUI as a user with **Administrator** privileges
 2. Check that current partition is **Common**
 3. Go to *Local Traffic -> iRules -> iRule List*
-4. Add iRule with name **OTP** and paste contents of file **irules/OTP.tcl**
-5. Add iRule with name **APM-OTP-Create_irule** and paste contents of file **irules/APM-OTP-Create.tcl**
-6. Add iRule with name **APM-OTP-Verify_irule** and paste contents of file **irules/APM-OTP-Verify.tcl**
-7. Add iRule with name **LTM-OTP-Verify_irule** and paste contents of file **irules/LTM-OTP-Verify.tcl**
+4. Add iRule with name **OTP** and paste contents of [OTP.tcl](../irules/OTP.tcl) file
+5. Add iRule with name **APM-OTP-Create_irule** and paste contents of [APM-OTP-Create.tcl](../irules/APM-OTP-Create.tcl) file
+6. Add iRule with name **APM-OTP-Verify_irule** and paste contents of [APM-OTP-Verify.tcl](../irules/APM-OTP-Verify.tcl) file
+7. Add iRule with name **LTM-OTP-Verify_irule** and paste contents of [LTM-OTP-Verify.tcl](../irules/LTM-OTP-Verify.tcl) file
 
 ## Create BIG-IP iRules LX
 
@@ -82,9 +82,9 @@ You also need to know that users in you directory services catalog must have val
 3. Go to *System -> Resource Provisioning* and check that **iRules Language Extensions (iRulesLX)** is licensed and provisioned. If not you have to enable it. Remember that module reprovision may disrupt traffic processing on BIG-IP
 4. Go to *Local Traffic -> iRules -> LX Workspaces*
 5. Add new workspace with name **LDAP-Modify_space**
-6. Add iRule with name **APM-LDAP-Modify_irule** and paste contents of file **iruleslx/APM-LDAP-Modify.tcl**
+6. Add iRule with name **APM-LDAP-Modify_irule** and paste contents of [APM-LDAP-Modify.tcl](../iruleslx/APM-LDAP-Modify.tcl) file
 7. Add extension with name **APM-LDAP-Modify_ilx**
-8. Replace contents of file **index.js** with contents of file **iruleslx/APM-LDAP-Modify.js**
+8. Replace contents of file **index.js** with contents of [APM-LDAP-Modify.js](../iruleslx/APM-LDAP-Modify.js) file
 9. Log in to BIG-IP CLI as a user with **Administrator** privileges
 10. Execute command `bash`
 11. Execute command `cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/`

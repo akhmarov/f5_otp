@@ -1,20 +1,26 @@
-Policy Name: APM-OTP-Create_access
-Policy Description: Implements One-Time Password (OTP) configuration portal
+# Policy Description
 
-Macro Names:
-- AD Modify
-- AD Verify
-- Notify Admin
-- Notify User
-- OTP Assign
-- OTP Create
-- OTP Verify
+This is a description of each element in Visual Policy Editor (VPE) which need to be created and configured in order to establish One-Time Password (OTP) configuration portal APM policy.
 
-################################################################################
+## Contents
+1. Policy
+2. Macro
+   1. Macro AD Modify
+   2. Macro AD Verify
+   3. Macro Notify Admin
+   4. Macro Notify User
+   5. Macro OTP Assign
+   6. Macro OTP Create
+   7. Macro OTP Verify
 
-Redirect #3
-https://otp.domain.tld/
-Close session after redirect
+## Policy
+
+![Policy](../pics/install_vpe1.png)
+
+Terminals:
+	Redirect (color #3)
+	https://otp.contoso.com/
+	Close session after redirect
 
 Need Update [Decision Box]
 	Message = One-Time Password (OTP) authentication token is already attached. Do you want to update it?
@@ -31,7 +37,11 @@ Browser Missing [Message Box]
 	Message = One-Time Password (OTP) is enabled for your account but authentication token is missing. Please, click link below to attach new one
 	Link = Attach Token
 
-################################################################################
+## Macro
+
+![Macro1](../pics/install_vpe2.png)
+
+### AD Modify
 
 LDAP Config [Variable Assign]
 	session.custom.ldap.bind_scheme = return {ldap://}
@@ -47,7 +57,7 @@ LDAP Modify [iRule Event]
 	ID = ldap_modify
 	Successful = expr {[mcget -nocache {session.custom.ldap.modify_result}] == 0}
 
-################################################################################
+### AD Verify
 
 Browser Logon [Logon Page]
 	Split domain from full Username = Yes
@@ -68,7 +78,9 @@ Browser Deny [Message Box]
 	Message = You are not allowed to use this service. Please contact your system administrator
 	Link = Exit
 
-################################################################################
+![Macro1](../pics/install_vpe3.png)
+
+### Notify Admin
 
 Email
 	SMTP Configuration = /Common/PARTITION-Authenticated_smtp
@@ -90,7 +102,7 @@ Internal Error [Message Box]
 	Message = Internal error occurred. Please, try again later
 	Link = Exit
 
-################################################################################
+### Notify User
 
 Email
 	SMTP Configuration = /Common/Unauthenticated_smtp
@@ -103,7 +115,9 @@ Action Done [Message Box]
 	Message = One-Time Password (OTP) authentication token was successfully updated
 	Link = Exit
 
-################################################################################
+![Macro1](../pics/install_vpe4.png)
+
+### OTP Assign
 
 OTP Config [Variable Assign]
 	session.custom.otp.secret_value = AAA extensionAttribute2
@@ -118,7 +132,7 @@ OTP Config [Variable Assign]
 	session.custom.otp.security_period = return {60}
 	session.custom.otp.security_delay = return {300}
 
-################################################################################
+### OTP Create
 
 OTP Create [iRule Event]
 	ID = otp_create
@@ -134,7 +148,7 @@ QR Display [Message Box]
 <p>Secret: %{session.custom.otp.secret_value_dec}</p>
 	Link = Verify
 
-################################################################################
+### OTP Verify
 
 Browser OTP [Logon Page]
 	Type = text; Post Variable Name = otp_value; Session Variable Name = otp_value

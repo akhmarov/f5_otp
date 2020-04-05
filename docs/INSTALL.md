@@ -39,7 +39,7 @@ OTP application consists of:
 14. SMTP password. Password for authenticated SMTP connection
 15. SMTP address for BIG-IP administrators. Email address of BIG-IP administrators that will receive **Internal Error** messages
 16. SMTP address for noreply. Email address that is not available for message receiving inside organization. This address will be used for mesasges delivered to users
-17. LDAP administrator login. SamAccountName of the Active Directory administrator to be used for Active Directory AAA object. This account must have **Domain Admins** permissions to fetch Active Directory password policies to support password-related functionality
+17. LDAP administrator login. SamAccountName of the Active Directory administrator to be used for Active Directory AAA object. This account must be a member of **CONTOSO\Domain Admins** group to fetch Active Directory password policies to support password-related functionality
 18. LDAP administrator password. Password for Active Directory administrator
 
 Example list of external objects:
@@ -55,10 +55,10 @@ Example list of external objects:
 * extensionAttribute2
 * CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com
 * smtp.contoso.com
-* <div>bigipsmtpuser@contoso.com</div>
+* bigipsmtpuser@contoso.com
 * COMPLEX_SMTP_PASSWORD_STRING
-* <div>bigipadmins@contoso.com</div>
-* <div>noreply@contoso.com</div>
+* bigipadmins@contoso.com
+* noreply@contoso.com
 * bigipaddsadminuser
 * COMPLEX_ADDS_PASSWORD_STRING
 
@@ -136,11 +136,12 @@ You also need to know that users in you directory services catalog must have val
 5. Go to *Access -> Profiles / Policies -> Access Profiles (Per-Session Policies)*
 6. Add new policy with name **APM-OTP-Create_access**
 7. Select **All** from **Profile Type**
-8. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description](./POLICY.txt) document
+8. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description](./POLICY.md) document
 
 ![Policy](../pics/install_vpe1.png)
 ![Macro1](../pics/install_vpe2.png)
 ![Macro2](../pics/install_vpe3.png)
+![Macro3](../pics/install_vpe4.png)
 
 ## Create OTP-APM virtual server
 
@@ -211,7 +212,7 @@ create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http:
 7. Select **http** from **HTTP Profile (Client)**
 8. Select **/Common/LTM-OTP-Verify_irule** from **iRules**
 
-ATTENTION! You need to secure this virtual server either with custom iRule or AFM that will restrict connections to sourced from this BIG-IP or trusted servers only. AFM is a prefered solution.
+**ATTENTION!** You need to secure this virtual server either with custom iRule or AFM that will restrict connections to sourced from this BIG-IP or trusted servers only. AFM is a prefered solution.
 
 TMSH command:
 ```
@@ -229,4 +230,4 @@ create ltm virtual LTM-OTP-Verify_vs { destination 192.0.2.2:http ip-protocol tc
 8. Add new iFile with name **otpenc-key**
 9. Select **CONTOSO-otpenc-key** from **File Name**, where CONTOSO is a domain/tenant name
 
-ATTENTION! File uploaded to this GitHub repository contains very simple and guessable encryption key. You **MUST** create your own.
+**ATTENTION!** File uploaded to this GitHub repository contains very simple and guessable encryption key. You **MUST** create your own.

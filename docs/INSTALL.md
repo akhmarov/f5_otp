@@ -10,6 +10,7 @@ OTP application consists of:
 ---
 
 ## Contents
+
 1. Create external objects
 2. Create BIG-IP iRules
 3. Create BIG-IP iRules LX
@@ -93,7 +94,8 @@ You also need to know that users in you directory services catalog must have val
 14. Check that current partition is **Common**
 15. Go to *Local Traffic -> iRules -> LX Pugins*
 16. Add new plugin with name **LDAP-Modify_plugin**
-17. Select **ilx-extension** from **Log Publisher** and **LDAP-Modify_space** from **From Workspace**. More about **ilx-extension** may be found in [Jason Rahm's article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
+17. Select **ilx-extension** from **Log Publisher**. More about **ilx-extension** may be found in [Jason Rahm's article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
+18. Select **LDAP-Modify_space** from **From Workspace**
 
 ### Create TMOS SMTP objects
 

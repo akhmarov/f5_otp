@@ -49,7 +49,7 @@ Example list of external objects:
 * 192.0.2.1
 * 192.0.2.2
 * ldap://
-* corp.contoso.com
+* corp.contoso.com (resolves to 198.51.100.10 and 198.51.100.11)
 * 389
 * CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com
 * COMPLEX_2FA_PASSWORD_STRING
@@ -138,7 +138,8 @@ You also need to know that users in you directory services catalog must have val
 5. Go to *Access -> Profiles / Policies -> Access Profiles (Per-Session Policies)*
 6. Add new policy with name **APM-OTP-Create_access**
 7. Select **All** from **Profile Type**
-8. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description](./POLICY.md) document
+8. Select **English (en)** from **Languages**
+9. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description](./POLICY.md) document
 
 ![Policy](../pics/install_vpe1.png)
 ![Macro1](../pics/install_vpe2.png)

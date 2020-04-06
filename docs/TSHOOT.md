@@ -15,7 +15,8 @@ To troubleshoot this application there are two options which may be used in turn
 
 APM debug logs allow you to troubleshoot user flow during policy evaluation in `/var/log/apm` file. In the end of troubleshooting process you need to restore log settings to previous state because log files may be fulfilled with unnecessary information.
 
-![Log1](../pics/tshoot_debug1.png) ![Log2](../pics/tshoot_debug2.png)
+![Log1](../pics/tshoot_debug1.png)
+![Log2](../pics/tshoot_debug2.png)
 
 **Enable debug logs**
 1. Log in to BIG-IP GUI as a user with **Administrator** privileges

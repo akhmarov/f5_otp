@@ -20,7 +20,7 @@ Required systems for this application:
 * BIG-IP LTM + APM + iRulesLX (*)
 * Active Directory
 * SMTP server
-* OTP-compatible application
+* OTP-compatible generator
 
 \* - tested on version 14.x
 

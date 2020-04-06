@@ -56,7 +56,32 @@ Use this section when you troubleshooting APM policy with name **/CONTOSO/APM-OT
 5. Reload iRules LX plugin from Workspace
 
 Example output from `/var/log/ltm`:
-123
+```
+2020-04-07T00:53:25.789+03:00 bigip01 debug tmm3[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: secret_value =
+ZGpuZmFsaXVyaGc7cG93ajtuZUtGR0h3am93b2lhc25jeE9IVVMqKCZZKl4mVComWUlxd2dpeXJkYg==, secret_keyfile = /CONTOSO/otpenc-key, secret_hmac = sha1, otp_value = 123456
+2020-04-07T00:53:25.789+03:00 bigip01 debug tmm3[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: otp_numdig = 6, timestep_value = 30, timestep_num = 1, user_name = john
+2020-04-07T00:53:25.789+03:00 bigip01 debug tmm3[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: security_attempt = 3, security_period = 60, security_delay = 300
+2020-04-07T00:53:25.789+03:00 bigip01 debug tmm3[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: verify_result = 0
+2020-04-07T00:53:27.713+03:00 bigip01 debug tmm2[13663]: Rule /Common/APM-OTP-Create_irule <ACCESS_POLICY_AGENT_EVENT>: secret_keyfile = /CONTOSO/otpenc-key, secret_hmac = sha1, otp_numdig = 6
+2020-04-07T00:53:27.713+03:00 bigip01 debug tmm2[13663]: Rule /Common/APM-OTP-Create_irule <ACCESS_POLICY_AGENT_EVENT>: timestep_value = 30, user_mail = john@contoso.com
+2020-04-07T00:53:27.713+03:00 bigip01 debug tmm2[13663]: Rule /Common/APM-OTP-Create_irule <ACCESS_POLICY_AGENT_EVENT>: verify_result = 0
+2020-04-07T00:53:27.713+03:00 bigip01 debug tmm2[13663]: Rule /Common/APM-OTP-Create_irule <ACCESS_POLICY_AGENT_EVENT>: secret_value = aXVmOTM3OGd3OGZlYSBob2RYXiYqVEcqJkhxM3JqcWlvZjJla2xmam5VSExHJlRHV1FJRlVIUUlFV1==
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: secret_value = aXVmOTM3OGd3OGZlYSBob2RYXiYqVEcqJkhxM3JqcWlvZjJla2xmam5VSExHJlRHV1FJRlVIUUlFV1==, secret_keyfile = /CONTOSO/otpenc-key, secret_hmac = sha1, otp_value = 654321
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: otp_numdig = 6, timestep_value = 30, timestep_num = 1, user_name = john
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: security_attempt = 3, security_period = 60, security_delay = 300
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/APM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: verify_result = 0
+2020-04-07T00:53:46.782+03:00 bigip01 debug tmm1[13663]: Rule /Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule <ACCESS_POLICY_AGENT_EVENT>: ldap_bind_scheme = ldap://, ldap_bind_fqdn = corp.contoso.com, ldap_bind_port = 389
+2020-04-07T00:53:46.782+03:00 bigip01 debug tmm1[13663]: Rule /Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule <ACCESS_POLICY_AGENT_EVENT>: ldap_bind_dn = CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com, ldap_bind_pwd = *
+2020-04-07T00:53:46.782+03:00 bigip01 debug tmm1[13663]: Rule /Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule <ACCESS_POLICY_AGENT_EVENT>: ldap_user_dn = CN=John S.,OU=User Accounts,DC=corp,DC=contoso,DC=com, ldap_user_attr = extensionAttribute2, ldap_user_value = aXVmOTM3OGd3OGZlYSBob2RYXiYqVEcqJkhxM3JqcWlvZjJla2xmam5VSExHJlRHV1FJRlVIUUlFV1==
+2020-04-07T00:53:46.782+03:00 bigip01 debug tmm1[13663]: Rule /Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule <ACCESS_POLICY_AGENT_EVENT>: ilx_handle = /Common/LDAP-Modify_plugin:APM-LDAP-Modify_ilx
+2020-04-07T00:53:46.790+03:00 bigip01.contoso.com info sdmd[4689]: 018e0017:6: pid[13754]  plugin[/Common/LDAP-Modify_plugin.APM-LDAP-Modify_ilx] ldap_bind_scheme = ldap://, ldap_bind_fqdn = corp.contoso.com, ldap_bind_port = 389
+2020-04-07T00:53:46.791+03:00 bigip01.contoso.com info sdmd[4689]: 018e0017:6: pid[13754]  plugin[/Common/LDAP-Modify_plugin.APM-LDAP-Modify_ilx] ldap_bind_dn = CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com, ldap_bind_pwd = *
+2020-04-07T00:53:46.791+03:00 bigip01.contoso.com info sdmd[4689]: 018e0017:6: pid[13754]  plugin[/Common/LDAP-Modify_plugin.APM-LDAP-Modify_ilx] ldap_user_dn = CN=John S.,OU=User Accounts,DC=corp,DC=contoso,DC=com, ldap_user_attr = extensionAttribute2, ldap_user_secret = aXVmOTM3OGd3OGZlYSBob2RYXiYqVEcqJkhxM3JqcWlvZjJla2xmam5VSExHJlRHV1FJRlVIUUlFV1==
+2020-04-07T00:53:46.791+03:00 bigip01.contoso.com info sdmd[4689]: 018e0017:6: pid[13754]  plugin[/Common/LDAP-Modify_plugin.APM-LDAP-Modify_ilx] DNS resolve success: 192.0.2.10,192.0.2.11
+2020-04-07T00:53:46.828+03:00 bigip01.contoso.com info sdmd[4689]: 018e0017:6: pid[13754]  plugin[/Common/LDAP-Modify_plugin.APM-LDAP-Modify_ilx] LDAP bind success ldap://192.0.2.10:389
+2020-04-07T00:53:46.843+03:00 bigip01.contoso.com info sdmd[4689]: 018e0017:6: Per-invocation log rate exceeded; throttling.
+2020-04-07T00:53:46.843+03:00 bigip01 debug tmm1[13663]: Rule /Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule <ACCESS_POLICY_AGENT_EVENT>: ldap_modify_result = 0
+```
 
 **Disable debug logs**
 1. Set varible `static::otp_create_debug` to **0** in file **/Common/APM-OTP-Create_irule**
@@ -74,7 +99,12 @@ Use this section when you troubleshooting custom OTP enabled application.
 2. Set varible `static::otp_verify_ltm_debug` to **1** in file **/Common/LTM-OTP-Verify_irule**
 
 Example output from `/var/log/ltm`:
-123
+```
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/LTM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: secret_value = aXVmOTM3OGd3OGZlYSBob2RYXiYqVEcqJkhxM3JqcWlvZjJla2xmam5VSExHJlRHV1FJRlVIUUlFV1==, secret_keyfile = /CONTOSO/otpenc-key, secret_hmac = sha1, otp_value = 654321
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/LTM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: otp_numdig = 6, timestep_value = 30, timestep_num = 1, user_name = john
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/LTM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: security_attempt = 3, security_period = 60, security_delay = 300
+2020-04-07T00:53:46.779+03:00 bigip01 debug tmm1[13663]: Rule /Common/LTM-OTP-Verify_irule <ACCESS_POLICY_AGENT_EVENT>: verify_result = 0
+```
 
 **Disable debug logs**
 1. Set varible `static::otp_verify_apm_debug` to **0** in file **/Common/APM-OTP-Verify_irule**

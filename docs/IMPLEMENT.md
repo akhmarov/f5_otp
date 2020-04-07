@@ -168,5 +168,5 @@ In some cases, like stolen or lost device with configured OTP generator it is be
 6. Find **extensionAttribute2** attribute and open it
 7. Clear value
 
-**PowerShell**
+**PowerShell**  
 `Get-ADUser -Identity USER_NAME | Set-ADUser -Clear extensionAttribute2`, where USER_NAME is a sAMAccountName or any other value that may be used to find user account in Active Directory

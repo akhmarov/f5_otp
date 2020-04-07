@@ -2,10 +2,6 @@
 
 ![F5](pics/readme_f5.png) ![Plus](pics/plus.png) ![QR](pics/readme_qr.png) ![Plus](pics/plus.png) ![AD](pics/readme_ad.png)
 
-## The Story
-
-123
-
 ## Overview
 
 One-Time Password (OTP) application for F5 BIG-IP to be used in deployments **without** external Multi-Factor Authentication (MFA) servers, like paid products from well-known vendors. This application uses pure Active Directory for user authentication and shared secret value storage. All you need after the deployment of this app is to tell your users to download *AgileBits 1Password*, *Google Authenticator*, *Microsoft Authenticator* or any other OTP-compatible application to their mobile devices and start using Two-Factor Authentication (MFA) for your services.
@@ -13,6 +9,10 @@ One-Time Password (OTP) application for F5 BIG-IP to be used in deployments **wi
 This solution is based on:
 * RFC 4226 - HOTP: An HMAC-Based One-Time Password Algorithm
 * RFC 6238 - TOTP: Time-Based One-Time Password Algorithm
+
+## The Story
+
+123
 
 ### Screenshots
 

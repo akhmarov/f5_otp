@@ -3,11 +3,11 @@
 const ldap = require('ldapjs');
 
 const ldap_bind_scheme = 'ldap://';
-const ldap_bind_fqdn = 'corp.domain.tld';
+const ldap_bind_fqdn = 'corp.contoso.com';
 const ldap_bind_port = '389';
-const ldap_bind_dn = 'CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=domain,DC=tld';
+const ldap_bind_dn = 'CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com';
 const ldap_bind_pwd = 'COMPLEX_PASSWORD_STRING';
-const ldap_user_dn = 'CN=John S.,OU=User Accounts,DC=corp,DC=domain,DC=tld';
+const ldap_user_dn = 'CN=John S.,OU=User Accounts,DC=corp,DC=contoso,DC=com';
 const ldap_user_attr = 'extensionAttribute2';
 const ldap_user_secret = 'BASE64_STRING';
 

@@ -9,7 +9,7 @@
 # Description:
 #   This iRule is used in APM enabled virtual servers with support of event
 #   ACCESS_POLICY_AGENT_EVENT. It allows creation of shared secret value for
-#   purpose of usage for One-Time Password (OTP) enabled applications. Afte
+#   purpose of usage for One-Time Password (OTP) enabled applications. After
 #   successfull creation of shared secret value user has a choice to use
 #   cleartext value or encrypted one. Cleartext value is stored in secured APM
 #   session variable. This iRule depends on /Common/OTP library

@@ -1,15 +1,18 @@
 # Troubleshooting Guide
 
-To troubleshoot this application there are two options which may be used in turn or simultaniously. First step is to enable debug logs for an APM policy and gathering facts form `/var/log/apm` file. Second step is to enabled debug logs for iRules and iRules LX from this application and gathering facts from `/var/log/ltm` file. You can compine those steps to take a full picture of what is going on.
-
----
-
 ## Contents
 
+- [Overview](#overview)
 - [APM debug logs](#apm-debug-logs)
 - [iRules and iRules LX debug logs](#irules-and-irules-lx-debug-logs)
   - [OTP modification](#otp-modification)
   - [OTP verification](#otp-verification)
+
+---
+
+## Overview
+
+To troubleshoot this application there are two options which may be used in turn or simultaniously. First step is to enable debug logs for an APM policy and gathering facts form `/var/log/apm` file. Second step is to enabled debug logs for iRules and iRules LX from this application and gathering facts from `/var/log/ltm` file. You can compine those steps to take a full picture of what is going on.
 
 ## APM debug logs
 

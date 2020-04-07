@@ -1,13 +1,17 @@
 # Implementation Guide
 
-This guide will help you to configure appropriate type of One-Time Password (OTP) verification process that is valid for your environment. First option is to use iRule with name **APM-OTP-Verify_irule** and virtual server that do support APM **iRule Event**. This is the most commonly deployed model because it does not use external HTTP connections from APM to LTM virtual server. Second option is to use APM **HTTP Auth** with name **LTM-OTP-Verify_http** and virtual server that do not support APM **iRule Event**. This option must be used for special deployments like VMware Horizon Client.
+## Contents
+
+- [Overview](#overview)
+- [Setup OTP-APM](#setup-otp-apm)
+- [Setup OTP-LTM](#setup-otp-ltm)
+- [Reset user secret](#reset-user-secret)
 
 ---
 
-## Contents
+## Overview
 
-- [Setup OTP-APM](#setup-otp-apm)
-- [Setup OTP-LTM](#setup-otp-ltm)
+This guide will help you to configure appropriate type of One-Time Password (OTP) verification process that is valid for your environment. First option is to use iRule with name **APM-OTP-Verify_irule** and virtual server that do support APM **iRule Event**. This is the most commonly deployed model because it does not use external HTTP connections from APM to LTM virtual server. Second option is to use APM **HTTP Auth** with name **LTM-OTP-Verify_http** and virtual server that do not support APM **iRule Event**. This option must be used for special deployments like VMware Horizon Client.
 
 ## Setup OTP-APM
 
@@ -150,3 +154,19 @@ Type = Empty
 `Failed Code` = `expr {[string match "*X-Error-Code: 3*" [mcget {session.http.last.response_header.0}]] == 1}`  
 
 It is better to add some error description that will be visioble to user for all branches. So user could understand wether he or she entered wrong code or there were too many failed attempts and user was locked out.
+
+## Reset user secret
+
+In some cases, like stolen or lost device with configured OTP generator it is best to reset user shared secret value as soon as possible. To reset user shared secret value you have to obtain Active Directory permissions to modify **extensionAttribute2** attribute and clear it manually. You can use PowerShell or any other tool to acomplish this task for example.
+
+**Manual**
+1. Log in to Active Directory domain controller as a user with **Administrator** privileges or privileges enough to reset **extensionAttribute2** attribute
+2. Open MMC snap-in with name **Active Directory Users and Computers**
+3. Enable *View -> Advanced Features*
+4. Navigate to Organizational Unit where selected user account is located
+5. Open selected user account and navigate to **Attribute Editor** tab
+6. Find **extensionAttribute2** attribute and open it
+7. Clear value
+
+**PowerShell**
+`Get-ADUser -Identity USER_NAME | Set-ADUser -Clear extensionAttribute2`, where USER_NAME is a sAMAccountName or any other value that may be used to find user account in Active Directory

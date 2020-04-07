@@ -1,16 +1,8 @@
 # Installation Guide
 
-This manual will guide you through the OTP application installation process on F5 BIG-IP. You need to have LTM, APM and iRulesLX provisioned modules on your BIG-IP. For greater security it is better to have AFM provisioned module to be able to defend from various attacks. You also need to have Active Directory and SMTP server.
-
-OTP application consists of:
-* OTP-APM virtual server used as OTP configuration portal. Portal is used for creation and modification of assigned OTP token
-* OTP Verify iRule used for BIG-IP applications that do support APM **iRule Event**
-* OTP-LTM virtual server used for BIG-IP applications that do not support APM **iRule Event** (like VMware Horizon Client)
-
----
-
 ## Contents
 
+- [Overview](#overview)
 - [Create external objects](#create-external-objects)
 - [Create BIG-IP iRules](#create-big-ip-irules)
 - [Create BIG-IP iRules LX](#create-big-ip-irules-lx)
@@ -21,6 +13,17 @@ OTP application consists of:
 - [Create APM HTTP AAA object](#create-apm-http-aaa-object)
 - [Create OTP-LTM virtual server](#create-otp-ltm-virtual-server)
 - [Upload encryption key](#upload-encryption-key)
+
+---
+
+## Overview
+
+This manual will guide you through the OTP application installation process on F5 BIG-IP. You need to have LTM, APM and iRulesLX provisioned modules on your BIG-IP. For greater security it is better to have AFM provisioned module to be able to defend from various attacks. You also need to have Active Directory and SMTP server.
+
+OTP application consists of:
+* OTP-APM virtual server used as OTP configuration portal. Portal is used for creation and modification of assigned OTP token
+* OTP Verify iRule used for BIG-IP applications that do support APM **iRule Event**
+* OTP-LTM virtual server used for BIG-IP applications that do not support APM **iRule Event** (like VMware Horizon Client)
 
 ## Create external objects
 
@@ -219,7 +222,7 @@ create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http:
 7. Select **http** from **HTTP Profile (Client)**
 8. Select **/Common/LTM-OTP-Verify_irule** from **iRules**
 
-**ATTENTION!** You need to secure this virtual server either with custom iRule or AFM that will restrict connections to sourced from this BIG-IP or trusted servers only. AFM is a prefered solution.
+**ATTENTION!** You need to secure this virtual server either with custom iRule or AFM that will restrict connections to sourced from this BIG-IP or trusted servers only. AFM is the prefered solution.
 
 TMSH command:
 ```

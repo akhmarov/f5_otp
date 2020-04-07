@@ -1,11 +1,8 @@
 # Policy Description
 
-This is a description of each element in Visual Policy Editor (VPE) which need to be created and configured in order to establish One-Time Password (OTP) configuration portal APM policy. To fill all VPE fields properly you have to obtain all external objects that are mentioned in [Installation Guide](./INSTALL.md).
-
----
-
 ## Contents
 
+- [Overview](#overview)
 - [Policy](#policy)
 - [Macro](#macro)
   - [AD Modify](#ad-modify)
@@ -15,6 +12,13 @@ This is a description of each element in Visual Policy Editor (VPE) which need t
   - [OTP Assign](#otp-assign)
   - [OTP Create](#otp-create)
   - [OTP Verify](#otp-verify)
+
+---
+
+## Overview
+
+This is a description of each element in Visual Policy Editor (VPE) which need to be created and configured in order to establish One-Time Password (OTP) configuration portal APM policy. To fill all VPE fields properly you have to obtain all external objects that are mentioned in [Installation Guide](./INSTALL.md).
+
 
 ## Policy
 

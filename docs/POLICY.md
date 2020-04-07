@@ -218,6 +218,8 @@ ID = `otp_create`
 Type = Variable Assign  
 `session.custom.otp.qr_img` = Paste contents of [qrcode.tcl](../ifiles/qrcode.tcl) file  
 
+As you can see QR generator code is a pure JavaScipt code which is rendered in user's browser, so there were no external connections from OTP configuration portal or user's browser to Google servers, for example. This may be crucial for secure environments.
+
 **QR Display**  
 Type = Message Box  
 Message =

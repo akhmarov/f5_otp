@@ -1,32 +1,10 @@
 # F5 :: One-Time Password (OTP) application
 
-|   |   |   |   |   |
-|:-:|:-:|:-:|:-:|:-:|
-| ![F5](pics/readme_f5.png) | ![Plus](pics/plus.png) | ![QR](pics/readme_qr.png) | ![Plus](pics/plus.png) | ![AD](pics/readme_ad.png) |
-
-![F5](pics/readme_f5.png) ![Plus](pics/plus.png) ![QR](pics/readme_qr.png) ![Plus](pics/plus.png) ![AD](pics/readme_ad.png)
-
-<p float="left">
-  <img src="pics/readme_f5.png" alt="F5" />
-  <img src="pics/plus.png" alt="Plus" />
-  <img src="pics/readme_qr.png" alt="QR" />
-  <img src="pics/plus.png" alt="Plus" />
-  <img src="pics/readme_ad.png" alt="AD" />
-</p>
-
-<table>
-  <tr>
-    <td><img src="pics/readme_f5.png" alt="F5" /></td>
-    <td><img src="pics/plus.png" alt="Plus" /></td>
-    <td><img src="pics/readme_qr.png" alt="QR" /></td>
-    <td><img src="pics/plus.png" alt="Plus" /></td>
-    <td><img src="pics/readme_ad.png" alt="AD" /></td>
-  </tr>
- </table>
+![F5](pics/readme_f5.png) ![QR](pics/readme_qr.png) ![AD](pics/readme_ad.png)
 
 ## Overview
 
-One-Time Password (OTP) application for F5 BIG-IP designed for deployments **without** external Multi-Factor Authentication (MFA) servers. This application uses pure Active Directory for user authentication and shared secret value storage. All you need after the installation of this application is to tell your users to download *AgileBits 1Password*, *Google Authenticator*, *Microsoft Authenticator* or any other OTP-compatible application to their mobile devices and start using Two-Factor Authentication (MFA) for your services.
+One-Time Password (OTP) application for F5 BIG-IP designed for deployments **without** external Multi-Factor Authentication (MFA) servers. This application uses pure Active Directory for user authentication and shared secret value storage. This application uses local QR code rendering capability so you can built OTP configuration portal in high security environments without external access. All you need after the installation of this application is to tell your users to download *AgileBits 1Password*, *Google Authenticator*, *Microsoft Authenticator* or any other OTP-compatible application to their mobile devices and start using Two-Factor Authentication (MFA) for your services.
 
 This solution is based on:
 * [RFC 4226](https://tools.ietf.org/html/rfc4226) - HOTP: An HMAC-Based One-Time Password Algorithm

@@ -1,6 +1,6 @@
 # F5 :: One-Time Password (OTP) application
 
-![F5](pics/readme_f5.png) ![QR](pics/readme_qr.png) ![AD](pics/readme_ad.png)
+![F5](pics/readme_f5.png) ![Plus](pics/plus.png) ![QR](pics/readme_qr.png) ![Plus](pics/plus.png) ![AD](pics/readme_ad.png)
 
 ## Overview
 

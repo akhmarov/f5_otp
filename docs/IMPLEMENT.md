@@ -1,6 +1,6 @@
 # Implementation Guide
 
-This guide will help you to configure appropriate type of One-Time Password (OTP) verification process that is valid for your environment. First option is to use iRule with name **APM-OTP-Verify_irule** and virtual server that do support APM **iRule Event**. This is the most common deployment model because it does not use external HTTP connections from APM to LTM virtual server. Second option is to use APM **HTTP Auth** with name **LTM-OTP-Verify_http** and virtual server that do not support APM **iRule Event**. This option must be used for special deployments like VMware Horizon Client.
+This guide will help you to configure appropriate type of One-Time Password (OTP) verification process that is valid for your environment. First option is to use iRule with name **APM-OTP-Verify_irule** and virtual server that do support APM **iRule Event**. This is the most commonly deployed model because it does not use external HTTP connections from APM to LTM virtual server. Second option is to use APM **HTTP Auth** with name **LTM-OTP-Verify_http** and virtual server that do not support APM **iRule Event**. This option must be used for special deployments like VMware Horizon Client.
 
 ---
 
@@ -9,7 +9,9 @@ This guide will help you to configure appropriate type of One-Time Password (OTP
 1. Using **APM-OTP-Verify_irule** for virtual servers that do support APM **iRule Event** (OTP-APM)
 2. Using **LTM-OTP-Verify_http** for virtual servers that do not support APM **iRule Event** (OTP-LTM)
 
-## OTP-APM
+## Setup OTP-APM
+
+This is an example policy shows how to use APM **iRule Event** with iRule **APM-OTP-Verify_irule** to add Multi-Factor Authentication (MFA) to deployed on BIG-IP applications.
 
 ![Policy1](../pics/implement_vpe1.png)
 
@@ -77,7 +79,9 @@ ID = `otp_verify`
 
 It is better to add some error description that will be visioble to user for all branches except **Successful**. So user could understand wether he or she entered wrong code or there were too many failed attempts and user was locked out.
 
-## OTP-LTM
+## Setup OTP-LTM
+
+This is an example policy shows how to use APM **HTTP Auth** with iRule **LTM-OTP-Verify_irule** to add Multi-Factor Authentication (MFA) to deployed on BIG-IP applications that do not support APM **iRule Event**.
 
 ![Policy2](../pics/implement_vpe2.png)
 

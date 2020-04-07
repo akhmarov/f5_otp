@@ -12,15 +12,15 @@ OTP application consists of:
 ## Contents
 
 - [Create external objects](#create-external-objects)
-2. Create BIG-IP iRules
-3. Create BIG-IP iRules LX
-4. Create TMOS SMTP objects
-5. Create APM Active Directory AAA object
-6. Create APM policy
-7. Create OTP-APM virtual server
-8. Create APM HTTP AAA object
-9. Create OTP-LTM virtual server
-10. Upload encryption key
+- [Create BIG-IP iRules](#create-big-ip-irules)
+- [Create BIG-IP iRules LX](#create-big-ip-irules-lx)
+- [Create TMOS SMTP objects](#create-tmos-smtp-objects)
+- [Create APM Active Directory AAA object](#create-apm-active-directory-aaa-object)
+- [Create APM policy](#create-apm-policy)
+- [Create OTP-APM virtual server](#create-otp-apm-virtual-server)
+- [Create APM HTTP AAA object](#create-apm-http-aaa-object)
+- [Create OTP-LTM virtual server](#create-otp-ltm-virtual-server)
+- [Upload encryption key](#upload-encryption-key)
 
 ## Create external objects
 

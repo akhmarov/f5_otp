@@ -10,8 +10,8 @@
   - [APM-OTP-Verify_irule](#apm-otp-verify_irule)
   - [LTM-OTP-Verify_irule](#ltm-otp-verify_irule)
 - [iRules LX description](#irules-lx-description)
-  - [APM-LDAP-Modify_irule](apm-ldap-modify_irule)
-  - [index.js](#index.js)
+  - [APM-LDAP-Modify_irule](#apm-ldap-modify_irule)
+  - [APM-LDAP-Modify_ilx](#apm-ldap-modify_ilx)
 - [Notes](#notes)
 - [Caveats](#caveats)
 
@@ -51,7 +51,7 @@ More about implemented input variables and output data type you can find in [OTP
 
 ### APM-OTP-Create_irule
 
-This iRule is used in APM enabled virtual servers with support of event ACCESS_POLICY_AGENT_EVENT. It allows creation of shared secret value for purpose of usage for One-Time Password (OTP) enabled applications. After successfull creation of shared secret value user has a choice to use cleartext value or encrypted one. Cleartext value is stored in secured APM session variable. This iRule depends on /Common/OTP library.
+This iRule is used in APM enabled virtual servers with support of event **ACCESS_POLICY_AGENT_EVENT**. It allows creation of shared secret value for purpose of usage for One-Time Password (OTP) enabled applications. After successfull creation of shared secret value user has a choice to use cleartext value or encrypted one. Cleartext value is stored in secured APM session variable. This iRule depends on **/Common/OTP** library.
 
 **Variables list**  
 ```tcl
@@ -71,7 +71,7 @@ set secret_key [string trim [ifile get $secret_keyfile]]
 
 ### APM-OTP-Verify_irule
 
-This iRule is used in APM enabled virtual servers with support of event ACCESS_POLICY_AGENT_EVENT. If this event is not supported for some reasons or limitations please use LTM-OTP-Verify_irule attached virtual server. This iRule retrieves session variables from APM and checks user entered OTP value for correctness. This iRule depends on /Common/OTP library.
+This iRule is used in APM enabled virtual servers with support of event **ACCESS_POLICY_AGENT_EVENT**. If this event is not supported for some reasons or limitations please use **LTM-OTP-Verify_irule** attached virtual server. This iRule retrieves session variables from APM and checks user entered OTP value for correctness. This iRule depends on **/Common/OTP** library.
 
 **Variables list**  
 ```tcl
@@ -99,7 +99,7 @@ After OTP value validation this iRules checks for replay and brute force attacks
 
 ### LTM-OTP-Verify_irule
 
-This iRule is used in LTM enabled virtual servers that used to verify One-Time Password. This iRule depends on /Common/OTP library
+This iRule is used in LTM enabled virtual servers that used to verify One-Time Password. This iRule depends on **/Common/OTP** library
 
 **Variables list**  
 ```tcl
@@ -147,9 +147,9 @@ set ldap_user_value [ACCESS::session data get "session.custom.ldap.user_value"]
 
 More about implemented input variables and output data type you can find in [APM-LDAP-Modify.tcl](../iruleslx/APM-LDAP-Modify.tcl) file. File contains debug switch `set static::ldap_modify_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
 
-### index.js
+### APM-LDAP-Modify_ilx
 
-This iRule LX receives LDAP bind data and LDAP modify data from classic iRule. After successful LDAPS connection it modifies selected LDAP attribute with new value. This iRule LX assumes that LDAP URL will use ldaps:// scheme and 636 port. Bind operation has special parameter rejectUnauthorized=false to allow connection to untrusted SSL servers. This iRule LX assumes that selected LDAP attribute is already present on LDAP user. Otherwise modify operation will fail
+This iRule LX receives LDAP bind data and LDAP modify data from classic iRule. After successful LDAPS connection it modifies selected LDAP attribute with new value. This iRule LX assumes that LDAP URL will use **ldaps://** scheme and **636** port. Bind operation has special parameter **rejectUnauthorized=false** to allow connection to untrusted SSL servers. This iRule LX assumes that selected LDAP attribute is already present on LDAP user. Otherwise modify operation will fail
 
 ```js
 const ldap_bind_scheme = req.params()[0];

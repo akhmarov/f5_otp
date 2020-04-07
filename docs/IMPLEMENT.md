@@ -6,8 +6,8 @@ This guide will help you to configure appropriate type of One-Time Password (OTP
 
 ## Contents
 
-1. Using **APM-OTP-Verify_irule** for virtual servers that do support APM **iRule Event** (OTP-APM)
-2. Using **LTM-OTP-Verify_http** for virtual servers that do not support APM **iRule Event** (OTP-LTM)
+- [Setup OTP-APM](#setup-otp-apm)
+- [Setup OTP-LTM](#setup-otp-ltm)
 
 ## Setup OTP-APM
 

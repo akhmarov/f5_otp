@@ -6,15 +6,15 @@ This is a description of each element in Visual Policy Editor (VPE) which need t
 
 ## Contents
 
-1. Policy
-2. Macro
-   * AD Modify
-   * AD Verify
-   * Notify Admin
-   * Notify User
-   * OTP Assign
-   * OTP Create
-   * OTP Verify
+- [Policy](#policy)
+- [Macro](#macro)
+  - [AD Modify](#ad-modify)
+  - [AD Verify](#ad-verify)
+  - [Notify Admin](#notify-admin)
+  - [Notify User](#notify-user)
+  - [OTP Assign](#otp-assign)
+  - [OTP Create](#otp-create)
+  - [OTP Verify](#otp-verify)
 
 ## Policy
 
@@ -46,6 +46,8 @@ Message = `One-Time Password (OTP) is enabled for your account but authenticatio
 Link = `Attach Token`  
 
 ## Macro
+
+Macro definitions are used to simplify overall policy perception.
 
 ### AD Modify
 

@@ -15,7 +15,7 @@ This guide will help you to configure appropriate type of One-Time Password (OTP
 
 ## Setup OTP-APM
 
-This is an example policy shows how to use APM **iRule Event** with iRule **APM-OTP-Verify_irule** to add Multi-Factor Authentication (MFA) to deployed on BIG-IP applications.
+This is an example policy shows how to use APM **iRule Event** with iRule **APM-OTP-Verify_irule** to add Multi-Factor Authentication (MFA) to applications deployed on BIG-IP.
 
 ![Policy1](../pics/implement_vpe1.png)
 
@@ -81,11 +81,11 @@ ID = `otp_verify`
 `Locked User` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 2}`  
 `Failed Code` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 3}`  
 
-It is better to add some error description that will be visioble to user for all branches except **Successful**. So user could understand wether he or she entered wrong code or there were too many failed attempts and user was locked out.
+It is better to add some error description that will be visible to user for all branches except **Successful**. So user will understand that he or she entered wrong code or there were too many failed attempts and user was locked out.
 
 ## Setup OTP-LTM
 
-This is an example policy shows how to use APM **HTTP Auth** with iRule **LTM-OTP-Verify_irule** to add Multi-Factor Authentication (MFA) to deployed on BIG-IP applications that do not support APM **iRule Event**.
+This is an example policy shows how to use APM **HTTP Auth** with iRule **LTM-OTP-Verify_irule** to add Multi-Factor Authentication (MFA) to applications deployed on BIG-IP that do not support APM **iRule Event**.
 
 ![Policy2](../pics/implement_vpe2.png)
 
@@ -153,11 +153,11 @@ Type = Empty
 `Locked User` = `expr {[string match "*X-Error-Code: 2*" [mcget {session.http.last.response_header.0}]] == 1}`  
 `Failed Code` = `expr {[string match "*X-Error-Code: 3*" [mcget {session.http.last.response_header.0}]] == 1}`  
 
-It is better to add some error description that will be visioble to user for all branches. So user could understand wether he or she entered wrong code or there were too many failed attempts and user was locked out.
+It is better to add some error description that will be visible to user for all branches. So user will understand that he or she entered wrong code or there were too many failed attempts and user was locked out.
 
 ## Reset user secret
 
-In some cases, like stolen or lost device with configured OTP generator it is best to reset user shared secret value as soon as possible. To reset user shared secret value you have to obtain Active Directory permissions to modify **extensionAttribute2** attribute and clear it manually. You can use PowerShell or any other tool to acomplish this task for example.
+In some cases, like stolen or lost device with configured OTP generator, it is required to reset user shared secret value as soon as possible. To reset user shared secret value you have to obtain Active Directory permissions to modify **extensionAttribute2** attribute and clear it manually. You can use PowerShell or any other tool to accomplish this task for example.
 
 **Manual**
 1. Log in to Active Directory domain controller as a user with **Administrator** privileges or privileges enough to reset **extensionAttribute2** attribute

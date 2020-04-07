@@ -18,7 +18,7 @@
 
 ## Overview
 
-This manual will guide you through the OTP application installation process on F5 BIG-IP. You need to have LTM, APM and iRulesLX provisioned modules on your BIG-IP. For greater security it is better to have AFM provisioned module to be able to defend from various attacks. You also need to have Active Directory and SMTP server.
+This manual will guide you through the OTP application installation process on F5 BIG-IP. You need to have LTM, APM and iRulesLX provisioned modules on your BIG-IP. It is better to have AFM provisioned module to be able to defend from various attacks. You also need to have Active Directory and SMTP server.
 
 OTP application consists of:
 * OTP-APM virtual server used as OTP configuration portal. Portal is used for creation and modification of assigned OTP token
@@ -31,18 +31,18 @@ OTP application consists of:
 2. BIG-IP client SSL profile. Select a client SSL profile with Perfect Forward Secrecy (PFS) configured
 3. IP address for OTP-APM virtual server. This address will be used for an OTP configuration portal
 4. IP address for OTP-LTM virtual server. This address will be used for applications that do not support APM **iRule Event**
-5. LDAP scheme. Valid values are **ldap://** or **ldaps://**. First one is recommended for usage because second one leads to strange errors which are sourced from *ldapjs* NPM package
-6. LDAP fully qualified domain name. DNS domain name or host name if you are using single LDAP server. For example, if you have Active Directory with **corp.contoso.com** DNS domain name which resolves to more than one Active Directory Domain Controller it is the best available option. iRule LX will resolve FQDN to all available server names and try each one in case previous failed
-7. LDAP port. Valid values are **389** or **636**. First one is recommended for usage because second one leads to strange errors which are sourced from *ldapjs* NPM package
+5. LDAP scheme. Valid values are **ldap://** or **ldaps://**. First is recommended for usage because second leads to strange errors which are sourced from *ldapjs* NPM package
+6. LDAP fully qualified domain name. DNS domain name or host name if you use single LDAP server. For example, if you have Active Directory with **corp.contoso.com** DNS domain name which resolves to more than one Active Directory Domain Controller, it will be the best available option (from the High-Availability perspective). iRule LX will resolve FQDN to all available server names and try each one in case previous failed
+7. LDAP port. Valid values are **389** or **636**. First is recommended for usage because second leads to strange errors which are sourced from *ldapjs* NPM package
 8. LDAP user distinguished name. Distinguished name of Active Directory user with permissions to modify attribute selected to store encrypted OTP secret value
 9. LDAP user password. Password for Active Directory user
 10. LDAP attribure. Name of the Active Directory attribure to store encrypted OTP secret value. Standard implementation uses attribute name **extensionAttribute2**, but you are free to choose another one. Selected attribute must be available for read/write operations for LDAP user
-11. LDAP group distinguished name. Distinguished name of Active Directory group that will allow access to OTP configuration portal. Standard implementation uses **Fetch Nested Groups** AD Query option so this group may be nested in Active Directory
-12. SMTP server hostname. FQDN of SMTP server that is able to deliver email to BIG-IP administrators and users. Server must support authenticated and nonauthenticated connections. Authenticated connection is used to deliver messages to BIG-IP administrators and unauthenticated connection is used to deliver noreply messages to regular users
+11. LDAP group distinguished name. Distinguished name of Active Directory group that will allow access to OTP configuration portal. Standard implementation uses **Fetch Nested Groups** AD Query option, so this group may be nested in Active Directory
+12. SMTP server host name. FQDN of SMTP server that is able to deliver email to BIG-IP administrators and users. Server must support authenticated and nonauthenticated connections. Authenticated connection is used to deliver messages to BIG-IP administrators and unauthenticated connection is used to deliver noreply messages to regular users
 13. SMTP user. Username for authenticated SMTP connection
 14. SMTP password. Password for authenticated SMTP connection
 15. SMTP address for BIG-IP administrators. Email address of BIG-IP administrators that will receive **Internal Error** messages
-16. SMTP address for noreply. Email address that is not available for message receiving inside organization. This address will be used for mesasges delivered to users
+16. SMTP address for noreply. Email address that is not available for reply, this address will be used for mesasges delivered to users
 17. LDAP administrator login. SamAccountName of the Active Directory administrator to be used for Active Directory AAA object. This account must be a member of **CONTOSO\Domain Admins** group to fetch Active Directory password policies to support password-related functionality
 18. LDAP administrator password. Password for Active Directory administrator
 
@@ -66,8 +66,7 @@ Example list of external objects:
 * bigipaddsadminuser
 * COMPLEX_ADDS_PASSWORD_STRING
 
-You can safely choose another directory services, like Apache Directory Server, OpenLDAP or other software. In the core this solution uses NPM package *ldapjs* which is compatible with any directory service with LDAP enabled access.
-You also need to know that users in you directory services catalog must have valid email addresses stored in one of the attributes because these addresses are used to deliver messages about OTP token operations.
+You can safely choose another directory services, like Apache Directory Server, OpenLDAP or other software. In the core this solution uses NPM package *ldapjs* which is compatible with any directory service with LDAP enabled access. Users in you directory services catalog must have valid email addresses stored in one of the attributes because these addresses are used to deliver messages about OTP token operations.
 
 ## Create BIG-IP iRules
 
@@ -222,7 +221,7 @@ create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http:
 7. Select **http** from **HTTP Profile (Client)**
 8. Select **/Common/LTM-OTP-Verify_irule** from **iRules**
 
-**ATTENTION!** You need to secure this virtual server either with custom iRule or AFM that will restrict connections to sourced from this BIG-IP or trusted servers only. AFM is the prefered solution.
+**ATTENTION!** You need to secure this virtual server with custom iRule or AFM that will restrict connections to sourced from this BIG-IP or trusted servers only. AFM is the prefered solution.
 
 TMSH command:
 ```

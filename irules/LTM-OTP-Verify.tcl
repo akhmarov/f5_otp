@@ -10,7 +10,7 @@
 #   Vladimir Akhmarov
 #
 # Description:
-#   This iRule is used in LTM enabled virtual servers that used to verify
+#   This iRule is used in LTM enabled virtual servers used to verify
 #   One-Time Password. This iRule depends on /Common/OTP library
 #
 # HTTP query parameters (input):

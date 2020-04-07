@@ -12,11 +12,11 @@
 
 ## Overview
 
-To troubleshoot this application there are two options which may be used in turn or simultaniously. First step is to enable debug logs for an APM policy and gathering facts form `/var/log/apm` file. Second step is to enabled debug logs for iRules and iRules LX from this application and gathering facts from `/var/log/ltm` file. You can compine those steps to take a full picture of what is going on.
+To troubleshoot this application there are two options used in turn or simultaniously. First step is to enable debug logs for an APM policy and gather facts from `/var/log/apm` file. Second step is to enable debug logs for iRules and iRules LX from this application and gather facts from `/var/log/ltm` file. You can combine these steps to take a full picture of what is going on.
 
 ## APM debug logs
 
-APM debug logs allow you to troubleshoot user flow during policy evaluation in `/var/log/apm` file. In the end of troubleshooting process you need to restore log settings to previous state because log files may be fulfilled with unnecessary information.
+APM debug logs allow you to troubleshoot access flow during policy evaluation in `/var/log/apm` file. In the end of troubleshooting process you need to restore log settings to previous state because log files may be fulfilled with unnecessary information.
 
 ![Log1](../pics/tshoot_debug1.png)
 ![Log2](../pics/tshoot_debug2.png)
@@ -49,7 +49,7 @@ iRules and iRules LX debug logs allow you to troubleshoot data parsing processes
 
 ### OTP modification
 
-Use this section when you troubleshooting APM policy with name **/CONTOSO/APM-OTP-Create_access**.
+Use this section when you troubleshoot APM policy with name **/CONTOSO/APM-OTP-Create_access**.
 
 **Enable debug logs**
 1. Set varible `static::otp_create_debug` to **1** in file **/Common/APM-OTP-Create_irule**
@@ -95,7 +95,7 @@ ZGpuZmFsaXVyaGc7cG93ajtuZUtGR0h3am93b2lhc25jeE9IVVMqKCZZKl4mVComWUlxd2dpeXJkYg==
 
 ### OTP verification
 
-Use this section when you troubleshooting custom OTP enabled application.
+Use this section when you troubleshoot custom OTP enabled application.
 
 **Enable debug logs**
 1. Set varible `static::otp_verify_apm_debug` to **1** in file **/Common/APM-OTP-Verify_irule**

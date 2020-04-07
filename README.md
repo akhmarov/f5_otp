@@ -14,6 +14,16 @@
   <img src="pics/readme_ad.png" alt="AD" />
 </p>
 
+<table>
+  <tr>
+    <td><img src="pics/readme_f5.png" alt="F5" /></td>
+    <td><img src="pics/plus.png" alt="Plus" /></td>
+    <td><img src="pics/readme_qr.png" alt="QR" /></td>
+    <td><img src="pics/plus.png" alt="Plus" /></td>
+    <td><img src="pics/readme_ad.png" alt="AD" /></td>
+  </tr>
+ </table>
+
 ## Overview
 
 One-Time Password (OTP) application for F5 BIG-IP designed for deployments **without** external Multi-Factor Authentication (MFA) servers. This application uses pure Active Directory for user authentication and shared secret value storage. All you need after the installation of this application is to tell your users to download *AgileBits 1Password*, *Google Authenticator*, *Microsoft Authenticator* or any other OTP-compatible application to their mobile devices and start using Two-Factor Authentication (MFA) for your services.

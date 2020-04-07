@@ -6,10 +6,10 @@ To troubleshoot this application there are two options which may be used in turn
 
 ## Contents
 
-1. APM debug logs
-2. iRules and iRules LX debug logs
-   * OTP modification
-   * OTP verification
+- [APM debug logs](#apm-debug-logs)
+- [iRules and iRules LX debug logs](#irules-and-irules-lx-debug-logs)
+  - [OTP modification](#otp-modification)
+  - [OTP verification](#otp-verification)
 
 ## APM debug logs
 

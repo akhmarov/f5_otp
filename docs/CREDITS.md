@@ -7,3 +7,4 @@ Would like to thank:
 * Kai Wilke for [article on DevCentral](https://devcentral.f5.com/s/articles/google-authenticator-verification-irule-tmos-v111-optimized-984)
 * [@davidshimjs](https://github.com/davidshimjs) for [QR code project](https://github.com/davidshimjs/qrcodejs)
 * [@pavenkostanislav](https://github.com/pavenkostanislav) for adapting NodeJS code
+* [@ZigYu](https://github.com/ZigYu) for adapting NodeJS code

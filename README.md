@@ -12,7 +12,8 @@ This solution is based on:
 
 ### Screenshots
 
-![OTP1](pics/readme_otp1.png) ![OTP2](pics/readme_otp2.png) ![OTP3](pics/readme_otp3.png)
+![OTP1](pics/readme_otp1.png) ![OTP2](pics/readme_otp2.png)
+![OTP3](pics/readme_otp3.png) ![OTP4](pics/readme_otp4.png)
 
 ## Requirements
 

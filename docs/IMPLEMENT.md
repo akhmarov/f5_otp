@@ -39,25 +39,26 @@ Type = AD Query
 Server = **/CONTOSO/ActiveDirectory_aaa**  
 SearchFilter = `sAMAccountName=%{session.logon.last.username}`  
 Required Attributes: **dn**, **extensionAttribute2**, **mail**, **memberOf**, **sAMAccountName**  
-OTP = `expr {[mcget {session.ad.last.attr.extensionAttribute2}] != ""}`  
+OTP = `expr {[mcget {session.ad.last.attr.extensionAttribute2}] ne ""}`  
 
 You can customise **fallback** branch of this element and show descriptive error message for user. Like "You do not have an OTP token attached" or something else.
 
 **OTP Config**  
 Type = Variable Assign  
-`session.custom.otp.secret_value` = AAA extensionAttribute2  
+`session.custom.otp.secret_value` = `mcget {session.ad.last.attr.extensionAttribute2}`  
 `session.custom.otp.secret_keyfile` = `return {/CONTOSO/otpenc-key}`  
 `session.custom.otp.secret_hmac` = `return {sha1}`  
 `session.custom.otp.otp_numdig` = `return {6}`  
 `session.custom.otp.timestep_value` = `return {30}`  
 `session.custom.otp.timestep_num` = `return {1}`  
-`session.custom.otp.user_name` = AAA sAMAccountName  
-`session.custom.otp.user_mail` = AAA mail  
+`session.custom.otp.aaa_name` = `return {/CONTOSO/ActiveDirectory_aaa}`  
+`session.custom.otp.user_name` = `mcget {session.ad.last.attr.sAMAccountName}`  
+`session.custom.otp.user_mail` = `mcget {session.ad.last.attr.mail}`  
 `session.custom.otp.security_attempt` = `return {3}`  
 `session.custom.otp.security_period` = `return {60}`  
 `session.custom.otp.security_delay` = `return {300}`  
 
-**MFA Logon**  
+**MFA Page**  
 Type = Logon Page  
 Variable Type = text; Post Variable Name = `otp_value`; Session Variable Name = `otp_value`  
 Variable Type = **none**; Post Variable Name = password; Session Variable Name = password  
@@ -72,7 +73,7 @@ You can customise **fallback** branch of this element and show descriptive error
 
 **OTP Store**  
 Type = Variable Assign  
-`session.custom.otp.otp_value` = SESSION session.logon.last.otp_value  
+`session.custom.otp.otp_value` = `mcget {session.logon.last.otp_value}`  
 
 **OTP Verify**  
 Type = iRule Event  
@@ -109,25 +110,26 @@ Type = AD Query
 Server = **/CONTOSO/ActiveDirectory_aaa**  
 SearchFilter = `sAMAccountName=%{session.logon.last.username}`  
 Required Attributes: **dn**, **extensionAttribute2**, **mail**, **memberOf**, **sAMAccountName**  
-OTP = `expr {[mcget {session.ad.last.attr.extensionAttribute2}] != ""}`  
+OTP = `expr {[mcget {session.ad.last.attr.extensionAttribute2}] ne ""}`  
 
 You can customise **fallback** branch of this element and show descriptive error message for user. Like "You do not have an OTP token attached" or something else.
 
 **OTP Config**  
 Type = Variable Assign  
-`session.custom.otp.secret_value` = AAA extensionAttribute2  
+`session.custom.otp.secret_value` = `mcget {session.ad.last.attr.extensionAttribute2}`  
 `session.custom.otp.secret_keyfile` = `return {/CONTOSO/otpenc-key}`  
 `session.custom.otp.secret_hmac` = `return {sha1}`  
 `session.custom.otp.otp_numdig` = `return {6}`  
 `session.custom.otp.timestep_value` = `return {30}`  
 `session.custom.otp.timestep_num` = `return {1}`  
-`session.custom.otp.user_name` = AAA sAMAccountName  
-`session.custom.otp.user_mail` = AAA mail  
+`session.custom.otp.aaa_name` = `return {/CONTOSO/ActiveDirectory_aaa}`  
+`session.custom.otp.user_name` = `mcget {session.ad.last.attr.sAMAccountName}`  
+`session.custom.otp.user_mail` = `mcget {session.ad.last.attr.mail}`  
 `session.custom.otp.security_attempt` = `return {3}`  
 `session.custom.otp.security_period` = `return {60}`  
 `session.custom.otp.security_delay` = `return {300}`  
 
-**MFA Logon**  
+**MFA Page**  
 Type = Logon Page  
 Variable Type = text; Post Variable Name = `otp_value`; Session Variable Name = `otp_value`  
 Variable Type = **none**; Post Variable Name = password; Session Variable Name = password  
@@ -142,7 +144,7 @@ You can customise **fallback** branch of this element and show descriptive error
 
 **OTP Store**  
 Type = Variable Assign  
-`session.custom.otp.otp_value` = SESSION session.logon.last.otp_value  
+`session.custom.otp.otp_value` = `mcget {session.logon.last.otp_value}`  
 
 **HTTP Auth**  
 Type = HTTP Auth

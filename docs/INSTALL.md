@@ -154,7 +154,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 ![Macro3](../pics/install_vpe4.png)
 ![Macro4](../pics/install_vpe5.png)
 ![Macro5](../pics/install_vpe6.png)
-![Macro6](../pics/install_vpe7_std.png)
+![Macro6](../pics/install_vpe7_mdn.png)
 ![Macro7](../pics/install_vpe8.png)
 
 ## Create APM hosted content

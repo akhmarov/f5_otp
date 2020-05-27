@@ -45,6 +45,7 @@ proc verify_hotp {algo secret digit otp counter} { }
 proc verify_totp {algo secret digit otp step_size step_num} { }
 proc check_bruteforce {user period attempt delay} { }
 proc check_replay {user period otp} { }
+proc check_input {var_array flag_debug} { }
 ```
 
 More about implemented input variables and output data type you can find in [OTP.tcl](../irules/OTP.tcl) file. This file was built to be a library located in **Common** partition and to be used in other iRules as a backend function storage. Future updates to Request For Comments files (HOTP, TOTP or something new) may be applied to this library easily without modification of upper layer components. This library does not have any debug switches. All errors will be delivered to **local0.error** automatically.
@@ -55,11 +56,11 @@ This iRule is used in APM enabled virtual servers with support of event **ACCESS
 
 **Variables list**  
 ```tcl
-set secret_keyfile [ACCESS::session data get "session.custom.otp.secret_keyfile"]
-set secret_hmac [ACCESS::session data get "session.custom.otp.secret_hmac"]
-set otp_numdig [ACCESS::session data get "session.custom.otp.otp_numdig"]
-set timestep_value [ACCESS::session data get "session.custom.otp.timestep_value"]
-set user_mail [ACCESS::session data get "session.custom.otp.user_mail"]
+set otp(secret_keyfile) [ACCESS::session data get "session.custom.otp.secret_keyfile"]
+set otp(secret_hmac) [ACCESS::session data get "session.custom.otp.secret_hmac"]
+set otp(otp_numdig) [ACCESS::session data get "session.custom.otp.otp_numdig"]
+set otp(timestep_value) [ACCESS::session data get "session.custom.otp.timestep_value"]
+set otp(user_mail) [ACCESS::session data get "session.custom.otp.user_mail"]
 ```
 
 More about implemented input variables and output data type you can find in [APM-OTP-Create.tcl](../irules/APM-OTP-Create.tcl) file. File contains debug switch `set static::otp_create_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
@@ -75,17 +76,18 @@ This iRule is used in APM enabled virtual servers with support of event **ACCESS
 
 **Variables list**  
 ```tcl
-set secret_value [ACCESS::session data get "session.custom.otp.secret_value"]
-set secret_keyfile [ACCESS::session data get "session.custom.otp.secret_keyfile"]
-set secret_hmac [ACCESS::session data get "session.custom.otp.secret_hmac"]
-set otp_value [ACCESS::session data get "session.custom.otp.otp_value"]
-set otp_numdig [ACCESS::session data get "session.custom.otp.otp_numdig"]
-set timestep_value [ACCESS::session data get "session.custom.otp.timestep_value"]
-set timestep_num [ACCESS::session data get "session.custom.otp.timestep_num"]
-set user_name [ACCESS::session data get "session.custom.otp.user_name"]
-set security_attempt [ACCESS::session data get "session.custom.otp.security_attempt"]
-set security_period [ACCESS::session data get "session.custom.otp.security_period"]
-set security_delay [ACCESS::session data get "session.custom.otp.security_delay"]
+set otp(secret_value) [ACCESS::session data get "session.custom.otp.secret_value"]
+set otp(secret_keyfile) [ACCESS::session data get "session.custom.otp.secret_keyfile"]
+set otp(secret_hmac) [ACCESS::session data get "session.custom.otp.secret_hmac"]
+set otp(otp_value) [ACCESS::session data get "session.custom.otp.otp_value"]
+set otp(otp_numdig) [ACCESS::session data get "session.custom.otp.otp_numdig"]
+set otp(timestep_value) [ACCESS::session data get "session.custom.otp.timestep_value"]
+set otp(timestep_num) [ACCESS::session data get "session.custom.otp.timestep_num"]
+set otp(aaa_name) [ACCESS::session data get "session.custom.otp.aaa_name"]
+set otp(user_name) [ACCESS::session data get "session.custom.otp.user_name"]
+set otp(security_attempt) [ACCESS::session data get "session.custom.otp.security_attempt"]
+set otp(security_period) [ACCESS::session data get "session.custom.otp.security_period"]
+set otp(security_delay) [ACCESS::session data get "session.custom.otp.security_delay"]
 ```
 
 More about implemented input variables and output data type you can find in [APM-OTP-Verify.tcl](../irules/APM-OTP-Verify.tcl) file. File contains debug switch `set static::otp_verify_apm_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
@@ -103,17 +105,18 @@ This iRule is used in LTM enabled virtual servers used to verify One-Time Passwo
 
 **Variables list**  
 ```tcl
-set secret_value [URI::decode [URI::query [HTTP::uri] secret_value]]
-set secret_keyfile [URI::decode [URI::query [HTTP::uri] secret_keyfile]]
-set secret_hmac [URI::decode [URI::query [HTTP::uri] secret_hmac]]
-set otp_value [URI::decode [URI::query [HTTP::uri] otp_value]]
-set otp_numdig [URI::decode [URI::query [HTTP::uri] otp_numdig]]
-set timestep_value [URI::decode [URI::query [HTTP::uri] timestep_value]]
-set timestep_num [URI::decode [URI::query [HTTP::uri] timestep_num]]
-set user_name [URI::decode [URI::query [HTTP::uri] user_name]]
-set security_attempt [URI::decode [URI::query [HTTP::uri] security_attempt]]
-set security_period [URI::decode [URI::query [HTTP::uri] security_period]]
-set security_delay [URI::decode [URI::query [HTTP::uri] security_delay]]
+set otp(secret_value) [URI::decode [URI::query [HTTP::uri] secret_value]]
+set otp(secret_keyfile) [URI::decode [URI::query [HTTP::uri] secret_keyfile]]
+set otp(secret_hmac) [URI::decode [URI::query [HTTP::uri] secret_hmac]]
+set otp(otp_value) [URI::decode [URI::query [HTTP::uri] otp_value]]
+set otp(otp_numdig) [URI::decode [URI::query [HTTP::uri] otp_numdig]]
+set otp(timestep_value) [URI::decode [URI::query [HTTP::uri] timestep_value]]
+set otp(timestep_num) [URI::decode [URI::query [HTTP::uri] timestep_num]]
+set otp(aaa_name) [URI::decode [URI::query [HTTP::uri] aaa_name]]
+set otp(user_name) [URI::decode [URI::query [HTTP::uri] user_name]]
+set otp(security_attempt) [URI::decode [URI::query [HTTP::uri] security_attempt]]
+set otp(security_period) [URI::decode [URI::query [HTTP::uri] security_period]]
+set otp(security_delay) [URI::decode [URI::query [HTTP::uri] security_delay]]
 ```
 
 More about implemented input variables and output data type you can find in [LTM-OTP-Verify.tcl](../irules/LTM-OTP-Verify.tcl) file. File contains debug switch `set static::otp_verify_ltm_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
@@ -131,18 +134,18 @@ iRules LX used as a main component in shared secret value storage process. They 
 
 ### APM-LDAP-Modify_irule
 
-This iRule is wrapper for iRule LX that updates selected LDAP attribute with new value
+This iRule is wrapper for iRule LX that updates selected LDAP attribute with new value. This iRule depends on **/Common/OTP** library
 
 **Variables list**  
 ```tcl
-set ldap_bind_scheme [ACCESS::session data get "session.custom.ldap.bind_scheme"]
-set ldap_bind_fqdn [ACCESS::session data get "session.custom.ldap.bind_fqdn"]
-set ldap_bind_port [ACCESS::session data get "session.custom.ldap.bind_port"]
-set ldap_bind_dn [ACCESS::session data get "session.custom.ldap.bind_dn"]
-set ldap_bind_pwd [ACCESS::session data get -secure "session.custom.ldap.bind_pwd"]
-set ldap_user_dn [ACCESS::session data get "session.custom.ldap.user_dn"]
-set ldap_user_attr [ACCESS::session data get "session.custom.ldap.user_attr"]
-set ldap_user_value [ACCESS::session data get "session.custom.ldap.user_value"]
+set ldap(bind_scheme) [ACCESS::session data get "session.custom.ldap.bind_scheme"]
+set ldap(bind_fqdn) [ACCESS::session data get "session.custom.ldap.bind_fqdn"]
+set ldap(bind_port) [ACCESS::session data get "session.custom.ldap.bind_port"]
+set ldap(bind_dn) [ACCESS::session data get "session.custom.ldap.bind_dn"]
+set ldap(bind_pwd) [ACCESS::session data get -secure "session.custom.ldap.bind_pwd"]
+set ldap(user_dn) [ACCESS::session data get "session.custom.ldap.user_dn"]
+set ldap(user_attr) [ACCESS::session data get "session.custom.ldap.user_attr"]
+set ldap(user_value) [ACCESS::session data get "session.custom.ldap.user_value"]
 ```
 
 More about implemented input variables and output data type you can find in [APM-LDAP-Modify.tcl](../iruleslx/APM-LDAP-Modify.tcl) file. File contains debug switch `set static::ldap_modify_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
@@ -152,14 +155,14 @@ More about implemented input variables and output data type you can find in [APM
 This iRule LX receives LDAP bind data and LDAP modify data from classic iRule. After successful LDAPS connection it modifies selected LDAP attribute with new value. This iRule LX assumes that LDAP URL will use **ldaps://** scheme and **636** port. Bind operation has special parameter **rejectUnauthorized=false** to allow connection to untrusted SSL servers. This iRule LX assumes that selected LDAP attribute is already present on LDAP user. Otherwise modify operation will fail
 
 ```js
-const ldap_bind_scheme = req.params()[0];
-const ldap_bind_fqdn = req.params()[1];
-const ldap_bind_port = req.params()[2];
-const ldap_bind_dn = req.params()[3];
-const ldap_bind_pwd = req.params()[4];
-const ldap_user_dn = req.params()[5];
-const ldap_user_attr = req.params()[6];
-const ldap_user_secret = req.params()[7];
+const ldapBindScheme = req.params()[0];
+const ldapBindFqdn = req.params()[1];
+const ldapBindPort = req.params()[2];
+const ldapBindDn = req.params()[3];
+const ldapBindPwd = req.params()[4];
+const ldapUserDn = req.params()[5];
+const ldapUserAttr = req.params()[6];
+const ldapUserSecret = req.params()[7];
 ```
 
 More about implemented input variables and output data type you can find in [APM-LDAP-Modify.js](../iruleslx/APM-LDAP-Modify.js) file. File contains debug switch `const ldap_modify_debug` which allows you to check debug messages using `/var/log/ltm` file. All errors will be delivered to `/var/log/ltm` file automatically.

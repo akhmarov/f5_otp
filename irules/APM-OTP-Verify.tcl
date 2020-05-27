@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Verify_irule
-# Date:     October 2019
-# Version:  2.0
+# Date:     May 2020
+# Version:  2.3
 #
 # Authors:
 #   George Watkins
@@ -28,6 +28,8 @@
 #   session.custom.otp.timestep_num - Number of time step values (clock skew).
 #     Zero means that no clock skew is allowed, so only current time will be
 #     checked. Default is 1
+#   session.custom.otp.aaa_name - Name of the used AAA object for security check
+#     functions (check_bruteforce and check_replay)
 #   session.custom.otp.user_name - Name of the user to allow only one successful
 #     OTP validation attempt
 #   session.custom.otp.security_attempt - number of failed attempts before user
@@ -45,67 +47,86 @@
 #   3 - invalid OTP value
 #
 
-when RULE_INIT {
+when RULE_INIT priority 500 {
     # Debug switch
     set static::otp_verify_apm_debug 0
+
+    # APM agent id
+    set static::otp_verify_apm_agent "otp_verify"
 }
 
-when ACCESS_POLICY_AGENT_EVENT {
-    if {[ACCESS::policy agent_id] eq "otp_verify"} {
+when ACCESS_POLICY_AGENT_EVENT priority 500 {
+    if { [string tolower [ACCESS::policy agent_id]] eq $static::otp_verify_apm_agent } {
         # Import session variables from APM
-        set secret_value [ACCESS::session data get "session.custom.otp.secret_value"]
-        set secret_keyfile [ACCESS::session data get "session.custom.otp.secret_keyfile"]
-        set secret_hmac [ACCESS::session data get "session.custom.otp.secret_hmac"]
-        set otp_value [ACCESS::session data get "session.custom.otp.otp_value"]
-        set otp_numdig [ACCESS::session data get "session.custom.otp.otp_numdig"]
-        set timestep_value [ACCESS::session data get "session.custom.otp.timestep_value"]
-        set timestep_num [ACCESS::session data get "session.custom.otp.timestep_num"]
-        set user_name [ACCESS::session data get "session.custom.otp.user_name"]
-        set security_attempt [ACCESS::session data get "session.custom.otp.security_attempt"]
-        set security_period [ACCESS::session data get "session.custom.otp.security_period"]
-        set security_delay [ACCESS::session data get "session.custom.otp.security_delay"]
+        set otp(secret_value) [ACCESS::session data get "session.custom.otp.secret_value"]
+        set otp(secret_keyfile) [ACCESS::session data get "session.custom.otp.secret_keyfile"]
+        set otp(secret_hmac) [ACCESS::session data get "session.custom.otp.secret_hmac"]
+        set otp(otp_value) [ACCESS::session data get "session.custom.otp.otp_value"]
+        set otp(otp_numdig) [ACCESS::session data get "session.custom.otp.otp_numdig"]
+        set otp(timestep_value) [ACCESS::session data get "session.custom.otp.timestep_value"]
+        set otp(timestep_num) [ACCESS::session data get "session.custom.otp.timestep_num"]
+        set otp(aaa_name) [ACCESS::session data get "session.custom.otp.aaa_name"]
+        set otp(user_name) [ACCESS::session data get "session.custom.otp.user_name"]
+        set otp(security_attempt) [ACCESS::session data get "session.custom.otp.security_attempt"]
+        set otp(security_period) [ACCESS::session data get "session.custom.otp.security_period"]
+        set otp(security_delay) [ACCESS::session data get "session.custom.otp.security_delay"]
 
-        if {$static::otp_verify_apm_debug == 1} {
-            log local0.debug "secret_value = $secret_value, secret_keyfile = $secret_keyfile, secret_hmac = $secret_hmac, otp_value = $otp_value"
-            log local0.debug "otp_numdig = $otp_numdig, timestep_value = $timestep_value, timestep_num = $timestep_num, user_name = $user_name"
-            log local0.debug "security_attempt = $security_attempt, security_period = $security_period, security_delay = $security_delay"
-        }
-
-        if {[string trim $secret_value] eq "" || [string trim $secret_keyfile] eq "" || [string trim $secret_hmac] eq "" || [string trim $otp_value] eq ""
-            || [string trim $otp_numdig] eq "" || [string trim $timestep_value] eq "" || [string trim $timestep_num] eq "" || [string trim $user_name] eq ""
-            || [string trim $security_attempt] eq "" || [string trim $security_period] eq "" || [string trim $security_delay] eq ""} {
-            # Invalid input data from APM
-            log local0.error  "Input data extracted from APM is invalid for client [IP::client_addr]"
-            set verify_result 1
-        } else {
+        if { [call OTP::check_input [array get otp] $static::otp_verify_apm_debug] } {
             # Extract decryption key from iFile
-            set secret_key [string trim [ifile get $secret_keyfile]]
+            set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
-            if {[llength [split $secret_key]] != 3} {
-                # Decryption key must be in format compatible with AES::decrypt
-                log local0.error "Decryption key has invalid format for client [IP::client_addr]"
+            if { [llength [split $secret_key]] != 3 } {
+                log local0.error "Encryption key has invalid format for client [IP::client_addr]"
+
+                # Encryption key must be in format compatible with AES::encrypt.
+                # Set return code to "invalid input data from APM"
                 set verify_result 1
             } else {
-                if {[call OTP::verify_totp $secret_hmac [AES::decrypt $secret_key [b64decode $secret_value]] $otp_numdig $otp_value $timestep_value $timestep_num]} {
-                    if {[call OTP::check_replay $user_name [expr {$timestep_value * $timestep_num}] $otp_value]} {
-                        set verify_result 0
-                    } else {
-                        set verify_result 3
-                    }
+                if { [catch { b64decode $otp(secret_value) } {result}] } {
+                    log local0.error "Secret value has invalid format for client [IP::client_addr]"
+
+                    # Secret value must be in format compatible with b64decode.
+                    # Set return code to "invalid input data from APM"
+                    set verify_result 1
                 } else {
-                    if {[call OTP::check_bruteforce $user_name $security_period $security_attempt $security_delay]} {
-                        set verify_result 3
+                    if { [call OTP::verify_totp $otp(secret_hmac) [AES::decrypt $secret_key $result] $otp(otp_numdig) $otp(otp_value) $otp(timestep_value) $otp(timestep_num)] } {
+                        if { [call OTP::check_replay $otp(aaa_name) $otp(user_name) [expr {$otp(timestep_value) * $otp(timestep_num)}] $otp(otp_value)] } {
+                            # User entered OTP value was verified and passed
+                            # Anti-Reply checks. Set return code to "OTP is
+                            # valid"
+                            set verify_result 0
+                        } else {
+                            # User entered OTP value have not passed Anti-Reply
+                            # checks. Set return code to "invalid OTP value"
+                            set verify_result 3
+                        }
                     } else {
-                        set verify_result 2
+                        if { [call OTP::check_bruteforce $otp(aaa_name) $otp(user_name) $otp(security_period) $otp(security_attempt) $otp(security_delay)] } {
+                            # User entered OTP value have not passed Anti-
+                            # Bruteforce checks. Set return code to "invalid
+                            # OTP value"
+                            set verify_result 3
+                        } else {
+                            # User entered wrong OTP value too many times. Set
+                            # return code to "user locked out"
+                            set verify_result 2
+                        }
                     }
                 }
             }
+        } else {
+            log local0.error  "Input data extracted from APM is invalid for client [IP::client_addr]"
+
+            # iRule received invalid data from APM. Set return code to "invalid
+            # input data from APM"
+            set verify_result 1
         }
 
-        if {$static::otp_verify_apm_debug == 1} {
+        if { $static::otp_verify_apm_debug == 1 } {
             log local0.debug "verify_result = $verify_result"
         }
 
+        # Export session variables to APM
         ACCESS::session data set "session.custom.otp.verify_result" $verify_result
     }
 }

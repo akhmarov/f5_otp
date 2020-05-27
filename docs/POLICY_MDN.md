@@ -1,4 +1,4 @@
-# Policy Description
+# Policy Description (modern)
 
 ## Contents
 
@@ -17,8 +17,7 @@
 
 ## Overview
 
-This is a description of each element in Visual Policy Editor (VPE) which need to be created and configured in order to establish One-Time Password (OTP) configuration portal APM policy. To fill all VPE fields properly you have to obtain all external objects that are mentioned in [Installation Guide](./INSTALL.md).
-
+This is a description of each element in Visual Policy Editor (VPE) which need to be created and configured in order to establish One-Time Password (OTP) configuration portal APM policy. To fill all VPE fields properly you have to obtain all external objects that are mentioned in [Installation Guide](./INSTALL.md). Use this document if you selected **modern** APM customization type (TMOS version **15.1.x** and above). If you selected **standard** APM customization type or you use legacy software (TMOS version 15.0.x and below) proceed to the [Policy Description (standard)](./POLICY_STD.md) document.
 
 ## Policy
 
@@ -33,7 +32,7 @@ Close session after redirect = Enabled
 
 **Need Update**  
 Type = Decision Box  
-Message = `One-Time Password (OTP) authentication token is already attached. Do you want to update it?`  
+Decision Box Title = `One-Time Password (OTP) authentication token is already attached. Do you want to update it?`  
 Field 1 image = green icon  
 Option 1 = `Continue`  
 Field 2 image = red icon  
@@ -41,13 +40,15 @@ Option 2 = `Exit`
 
 **Browser Good**  
 Type = Message Box  
-Message = `One-Time Password (OTP) authentication token is already up-to-date`  
-Link = `Exit`  
+Title = `OTP Good`  
+Description (optional) = `One-Time Password (OTP) authentication token is already <strong>up-to-date</strong>`  
+Button caption = `Exit`  
 
 **Browser Missing**  
 Type = Message Box  
-Message = `One-Time Password (OTP) is enabled for your account but authentication token is missing. Please, click link below to attach new one`  
-Link = `Attach Token`  
+Decision Box Title = `OTP Missing`  
+Description (optional) = `One-Time Password (OTP) is enabled for your account but authentication token <strong>is missing</strong>. Please, click button below to attach new one`  
+Button caption = `Attach Token`  
 
 ## Macro
 
@@ -71,8 +72,8 @@ Type = Variable Assign
 `session.custom.ldap.bind_fqdn` = `return {corp.contoso.com}`  
 `session.custom.ldap.bind_port` = `return {389}`  
 `session.custom.ldap.bind_dn` = `return {CN=bigip2faldapuser,OU=Service Accounts,DC=corp,DC=contoso,DC=com}`  
-`session.custom.ldap.bind_pwd` = `return {COMPLEX_2FA_PASSWORD_STRING}` [Secure]  
-`session.custom.ldap.user_dn` = AAA dn  
+**Secure** `session.custom.ldap.bind_pwd` = `return {COMPLEX_2FA_PASSWORD_STRING}`  
+`session.custom.ldap.user_dn` = `mcget {session.ad.last.attr.dn}`  
 `session.custom.ldap.user_attr` = `return {extensionAttribute2}`  
 `session.custom.ldap.user_value` = `mcget -nocache {session.custom.otp.secret_value}`  
 
@@ -105,19 +106,31 @@ Form Header Text = `One-Time Password (OTP) Configuration Portal`
 Type = AD Auth  
 Server = **/CONTOSO/ActiveDirectory_aaa**  
 
+**Extract Username**  
+Type = Variable Assign  
+`session.logon.last.username` = `return [lindex [split [mcget {session.logon.last.username}] "@"] 0]`  
+
 **AD Query**  
 Type = AD Query  
 Server = **/CONTOSO/ActiveDirectory_aaa**  
 SearchFilter = `sAMAccountName=%{session.logon.last.username}`  
 Fetch Nested Groups = Enabled  
 Required Attributes: **dn**, **extensionAttribute2**, **mail**, **memberOf**, **sAMAccountName**  
-memberOf and OTP = `expr {[mcget {session.ad.last.attr.memberOf}] contains "CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com" && [mcget {session.ad.last.attr.extensionAttribute2}] != ""}`  
-memberOf = `expr {[mcget {session.ad.last.attr.memberOf}] contains "CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com"}`  
+No Mail = `expr {[mcget {session.ad.last.attr.mail}] eq ""}`  
+memberOf and OTP = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget {session.ad.last.attr.memberOf}]] && [mcget {session.ad.last.attr.extensionAttribute2}] ne ""}`  
+memberOf = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget {session.ad.last.attr.memberOf}]]}`  
+
+**Browser Mail**  
+Type = Message Box  
+Title = `Missing Email`  
+Description (optional) = `You does not have <strong>assigned</strong> email address. Please, contact your system administrator`  
+Button caption = `Exit`  
 
 **Browser Deny**  
 Type = Message Box  
-Message = `You are not allowed to use this service. Please contact your system administrator`  
-Link = `Exit`  
+Title = `Forbidden`  
+Description (optional) = `You are <strong>not allowed</strong> to use this service. Please, contact your system administrator`  
+Button caption = `Exit`  
 
 ### Notify Admin
 
@@ -149,8 +162,9 @@ Platform: %{session.client.platform}
 
 **Internal Error**  
 Type = Message Box  
-Message = `Internal error occurred. Please, try again later`  
-Link = `Exit`  
+Title = `Error`  
+Description (optional) = `Internal error occurred. Please, try again later`  
+Button caption = `Exit`  
 
 ### Notify User
 
@@ -171,8 +185,9 @@ Message = `One-Time Password (OTP) authentication token was successfully updated
 
 **Action Done**  
 Type = Message Box  
-Message = `One-Time Password (OTP) authentication token was successfully updated`  
-Link = `Exit`  
+Title = `OTP Good`  
+Description (optional) = `One-Time Password (OTP) authentication token was successfully <strong>updated</strong>`  
+Button caption = `Exit`  
 
 ### OTP Assign
 
@@ -185,21 +200,22 @@ Color = #1
 
 **OTP Config**  
 Type = Variable Assign  
-`session.custom.otp.secret_value` = AAA extensionAttribute2  
+`session.custom.otp.secret_value` = `mcget {session.ad.last.attr.extensionAttribute2}`  
 `session.custom.otp.secret_keyfile` = `return {/CONTOSO/otpenc-key}`  
 `session.custom.otp.secret_hmac` = `return {sha1}`  
 `session.custom.otp.otp_numdig` = `return {6}`  
 `session.custom.otp.timestep_value` = `return {30}`  
 `session.custom.otp.timestep_num` = `return {1}`  
-`session.custom.otp.user_name` = AAA sAMAccountName  
-`session.custom.otp.user_mail` = AAA mail  
+`session.custom.otp.aaa_name` = `return {/CONTOSO/ActiveDirectory_aaa}`  
+`session.custom.otp.user_name` = `mcget {session.ad.last.attr.sAMAccountName}`  
+`session.custom.otp.user_mail` = `mcget {session.ad.last.attr.mail}`  
 `session.custom.otp.security_attempt` = `return {3}`  
 `session.custom.otp.security_period` = `return {60}`  
 `session.custom.otp.security_delay` = `return {300}`  
 
 ### OTP Create
 
-![Macro6](../pics/install_vpe7.png)
+![Macro6](../pics/install_vpe7_mdn.png)
 
 **Terminals**  
 Name = `Success`  
@@ -214,21 +230,16 @@ Type = iRule Event
 ID = `otp_create`  
 `Successful` = `expr {[mcget -nocache {session.custom.otp.verify_result}] == 0}`  
 
-**QR Create**  
-Type = Variable Assign  
-`session.custom.otp.qr_img` = Paste contents of [qrcode.tcl](../ifiles/qrcode.tcl) file  
-
-As you can see QR generator code is a pure JavaScipt code which is rendered in user's browser, so there were no external connections from OTP configuration portal or user's browser to Google servers, for example. This may be crucial for secure environments.
-
 **QR Display**  
 Type = Message Box  
-Message =
+Title = `QR Code`  
+Description (optional) =
 ```
-%{session.custom.otp.qr_img}
+<div id="qrcode"></div>
 <p>Account: %{session.ad.last.attr.mail}</p>
 <p>Secret: %{session.custom.otp.secret_value_dec}</p>
 ```
-Link = `Verify`  
+Button caption = `Verify`  
 
 ### OTP Verify
 
@@ -256,7 +267,7 @@ Type = Empty
 
 **OTP Store**  
 Type = Variable Assign  
-`session.custom.otp.otp_value` = SESSION session.logon.last.otp_value  
+`session.custom.otp.otp_value` = `mcget {session.logon.last.otp_value}`  
 
 **OTP Verify**  
 Type = iRule Event  
@@ -267,15 +278,18 @@ ID = `otp_verify`
 
 **Browser Locked**  
 Type = Message Box  
-Message = `User locked out for %{session.custom.otp.security_delay} seconds. Please, try again later`  
-Link = `Exit`  
+Title = `Token Locked`  
+Description (optional) = `Token locked out for <strong>%{session.custom.otp.security_delay}</strong> seconds. Please, try again later`  
+Button caption = `Exit`  
 
 **Browser Failed**  
 Type = Message Box  
-Message = `Code verification failed. Please, try again later`  
-Link = `Exit`  
+Title = `OTP Failed`  
+Description (optional) = `Code verification <strong>failed</strong>. Please, try again later`  
+Button caption = `Exit`  
 
 **Browser Invalid**  
 Type = Message Box  
-Message = `Code must be exactly %{session.custom.otp.otp_numdig} symbols`  
-Link = `Exit`  
+Title = `OTP Invalid`  
+Description (optional) = `Code must be exactly <strong>%{session.custom.otp.otp_numdig}</strong> symbols`  
+Button caption = `Exit`  

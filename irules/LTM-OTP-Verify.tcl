@@ -1,7 +1,7 @@
 #
 # Name:     LTM-OTP-Verify_irule
-# Date:     January 2020
-# Version:  2.1
+# Date:     May 2020
+# Version:  2.3
 #
 # Authors:
 #   George Watkins
@@ -24,6 +24,8 @@
 #     Default is 30
 #   timestep_num - Number of time step values (clock skew). Zero means that no
 #     clock skew is allowed, so only current time will be checked. Default is 1
+#   aaa_name - Name of the used AAA object for security check functions
+#     (check_bruteforce and check_replay)
 #   user_name - Name of the user to allow only one successful OTP validation
 #     attempt
 #   security_attempt - number of failed attempts before user lockout
@@ -38,80 +40,97 @@
 #   403 (X-Error-Code: 4) - invalid URL
 #
 
-when RULE_INIT {
+when RULE_INIT priority 500 {
     # Debug switch
     set static::otp_verify_ltm_debug 0
 }
 
-when HTTP_REQUEST {
-    switch -- [HTTP::path] {
+when HTTP_REQUEST priority 500 {
+    switch -- [string tolower [HTTP::path]] {
         "/otp_verify" {
             # Import variables from HTTP URI
-            set secret_value [URI::decode [URI::query [HTTP::uri] secret_value]]
-            set secret_keyfile [URI::decode [URI::query [HTTP::uri] secret_keyfile]]
-            set secret_hmac [URI::decode [URI::query [HTTP::uri] secret_hmac]]
-            set otp_value [URI::decode [URI::query [HTTP::uri] otp_value]]
-            set otp_numdig [URI::decode [URI::query [HTTP::uri] otp_numdig]]
-            set timestep_value [URI::decode [URI::query [HTTP::uri] timestep_value]]
-            set timestep_num [URI::decode [URI::query [HTTP::uri] timestep_num]]
-            set user_name [URI::decode [URI::query [HTTP::uri] user_name]]
-            set security_attempt [URI::decode [URI::query [HTTP::uri] security_attempt]]
-            set security_period [URI::decode [URI::query [HTTP::uri] security_period]]
-            set security_delay [URI::decode [URI::query [HTTP::uri] security_delay]]
+            set otp(secret_value) [URI::decode [URI::query [HTTP::uri] secret_value]]
+            set otp(secret_keyfile) [URI::decode [URI::query [HTTP::uri] secret_keyfile]]
+            set otp(secret_hmac) [URI::decode [URI::query [HTTP::uri] secret_hmac]]
+            set otp(otp_value) [URI::decode [URI::query [HTTP::uri] otp_value]]
+            set otp(otp_numdig) [URI::decode [URI::query [HTTP::uri] otp_numdig]]
+            set otp(timestep_value) [URI::decode [URI::query [HTTP::uri] timestep_value]]
+            set otp(timestep_num) [URI::decode [URI::query [HTTP::uri] timestep_num]]
+            set otp(aaa_name) [URI::decode [URI::query [HTTP::uri] aaa_name]]
+            set otp(user_name) [URI::decode [URI::query [HTTP::uri] user_name]]
+            set otp(security_attempt) [URI::decode [URI::query [HTTP::uri] security_attempt]]
+            set otp(security_period) [URI::decode [URI::query [HTTP::uri] security_period]]
+            set otp(security_delay) [URI::decode [URI::query [HTTP::uri] security_delay]]
 
-            if {$static::otp_verify_ltm_debug == 1} {
-                log local0.debug "secret_value = $secret_value, secret_keyfile = $secret_keyfile, secret_hmac = $secret_hmac, otp_value = $otp_value"
-                log local0.debug "otp_numdig = $otp_numdig, timestep_value = $timestep_value, timestep_num = $timestep_num, user_name = $user_name"
-                log local0.debug "security_attempt = $security_attempt, security_period = $security_period, security_delay = $security_delay"
-            }
-
-            if {[string trim $secret_value] eq "" || [string trim $secret_keyfile] eq "" || [string trim $secret_hmac] eq "" || [string trim $otp_value] eq ""
-                || [string trim $otp_numdig] eq "" || [string trim $timestep_value] eq "" || [string trim $timestep_num] eq "" || [string trim $user_name] eq ""
-                || [string trim $security_attempt] eq "" || [string trim $security_period] eq "" || [string trim $security_delay] eq ""} {
-                # Invalid input data from HTTP URI
-                log local0.error "Input data extracted from HTTP URI is invalid for client [IP::client_addr]"
-                set verify_result 1
-            } else {
+            if { [call OTP::check_input [array get otp] $static::otp_verify_ltm_debug] } {
                 # Extract decryption key from iFile
-                set secret_key [string trim [ifile get $secret_keyfile]]
+                set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
-                if {[llength [split $secret_key]] != 3} {
-                    # Decryption key must be in format compatible with AES::decrypt
+                if { [llength [split $secret_key]] != 3 } {
                     log local0.error "Decryption key has invalid format for client [IP::client_addr]"
+
+                    # Decryption key must be in format compatible with
+                    # AES::decrypt. Set return code to "invalid input data"
                     set verify_result 1
                 } else {
-                    if {[call OTP::verify_totp $secret_hmac [AES::decrypt $secret_key [b64decode $secret_value]] $otp_numdig $otp_value $timestep_value $timestep_num]} {
-                        if {[call OTP::check_replay $user_name [expr {$timestep_value * $timestep_num}] $otp_value]} {
-                            set verify_result 0
-                        } else {
-                            set verify_result 3
-                        }
+                    if { [catch { b64decode $otp(secret_value) } {result}] } {
+                        log local0.error "Secret value has invalid format for client [IP::client_addr]"
+
+                        # Secret value must be in format compatible with b64decode.
+                        # Set return code to "invalid input data from APM"
+                        set verify_result 1
                     } else {
-                        if {[call OTP::check_bruteforce $user_name $security_period $security_attempt $security_delay]} {
-                            set verify_result 3
+                        if { [call OTP::verify_totp $otp(secret_hmac) [AES::decrypt $secret_key $result] $otp(otp_numdig) $otp(otp_value) $otp(timestep_value) $otp(timestep_num)] } {
+                            if { [call OTP::check_replay $otp(aaa_name) $otp(user_name) [expr {$otp(timestep_value) * $otp(timestep_num)}] $otp(otp_value)] } {
+                                # User entered OTP value was verified and passed
+                                # Anti-Reply checks. Set return code to "OTP is
+                                # valid"
+                                set verify_result 0
+                            } else {
+                                # User entered OTP value have not passed Anti-Reply
+                                # checks. Set return code to "invalid OTP value"
+                                set verify_result 3
+                            }
                         } else {
-                            set verify_result 2
+                            if { [call OTP::check_bruteforce $otp(aaa_name) $otp(user_name) $otp(security_period) $otp(security_attempt) $otp(security_delay)] } {
+                                # User entered OTP value have not passed Anti-
+                                # Bruteforce checks. Set return code to "invalid OTP
+                                # value"
+                                set verify_result 3
+                            } else {
+                                # User entered wrong OTP value too many times. Set
+                                # return code to "user locked out"
+                                set verify_result 2
+                            }
                         }
                     }
                 }
+            } else {
+                log local0.error "Input data extracted from HTTP URI is invalid for client [IP::client_addr]"
+
+                # iRule received invalid data from HTTP URI. Set return code to
+                # "invalid input data"
+                set verify_result 1
             }
         }
         default {
             log local0.error "Requested invalid URL for client [IP::client_addr]"
+
+            # Requested URL is not implemented. Set return code to "invalid URL"
             set verify_result 4
         }
     }
 
-    if {$static::otp_verify_ltm_debug == 1} {
+    if { $static::otp_verify_ltm_debug == 1 } {
         log local0.debug "verify_result = $verify_result"
     }
 
-    switch -- $verify_result {
-        0 {
-            HTTP::respond 200 noserver
-        }
-        default {
-            HTTP::respond 403 X-Error-Code $verify_result noserver
-        }
+    if { $verify_result == 0 } {
+        # OTP was successfully verified. Return "200 OK" to client
+        HTTP::respond 200 noserver
+    } else {
+        # OTP was not verified. Return "403 X-Error-Code" with custom error code
+        # value to client
+        HTTP::respond 403 X-Error-Code $verify_result noserver
     }
 }

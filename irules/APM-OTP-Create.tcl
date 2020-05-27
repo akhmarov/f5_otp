@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Create_irule
-# Date:     October 2019
-# Version:  2.0
+# Date:     May 2020
+# Version:  2.3
 #
 # Authors:
 #   Vladimir Akhmarov
@@ -25,8 +25,8 @@
 #
 # APM session variables (output):
 #   session.custom.otp.verify_result - Return code (see below)
-#   session.custom.otp.secret_value_dec - Decrypted new shared secret value [S]
 #   session.custom.otp.secret_value - Encrypted new shared secret value
+#   session.custom.otp.secret_value_dec - Decrypted new shared secret value [S]
 #   session.custom.otp.qr_uri - QR uri with decrypted shared secret value [S]
 #
 # Return codes:
@@ -35,74 +35,87 @@
 #   2 - invalid shared secret value
 #
 
-when RULE_INIT {
+when RULE_INIT priority 500 {
     # Debug switch
     set static::otp_create_debug 0
+
+    # APM agent id
+    set static::otp_create_agent "otp_create"
 }
 
-when ACCESS_POLICY_AGENT_EVENT {
-    if { [ACCESS::policy agent_id] eq "otp_create" } {
+when ACCESS_POLICY_AGENT_EVENT priority 500 {
+    if { [string tolower [ACCESS::policy agent_id]] eq $static::otp_create_agent } {
         # Import session variables from APM
-        set secret_keyfile [ACCESS::session data get "session.custom.otp.secret_keyfile"]
-        set secret_hmac [ACCESS::session data get "session.custom.otp.secret_hmac"]
-        set otp_numdig [ACCESS::session data get "session.custom.otp.otp_numdig"]
-        set timestep_value [ACCESS::session data get "session.custom.otp.timestep_value"]
-        set user_mail [ACCESS::session data get "session.custom.otp.user_mail"]
+        set otp(secret_keyfile) [ACCESS::session data get "session.custom.otp.secret_keyfile"]
+        set otp(secret_hmac) [ACCESS::session data get "session.custom.otp.secret_hmac"]
+        set otp(otp_numdig) [ACCESS::session data get "session.custom.otp.otp_numdig"]
+        set otp(timestep_value) [ACCESS::session data get "session.custom.otp.timestep_value"]
+        set otp(user_mail) [ACCESS::session data get "session.custom.otp.user_mail"]
 
-        if {$static::otp_create_debug == 1} {
-            log local0.debug "secret_keyfile = $secret_keyfile, secret_hmac = $secret_hmac, otp_numdig = $otp_numdig"
-            log local0.debug "timestep_value = $timestep_value, user_mail = $user_mail"
-        }
-
-        if {[string trim $secret_keyfile] eq "" || [string trim $secret_hmac] eq "" || [string trim $otp_numdig] eq ""
-             || [string trim $timestep_value] eq "" || [string trim $user_mail] eq ""} {
-            # Invalid input data from APM
-            log local0.error  "Input data extracted from APM is invalid for client [IP::client_addr]"
-            set verify_result 1
-        } else {
+        if { [call OTP::check_input [array get otp] $static::otp_create_debug] } {
             # Extract encryption key from iFile
-            set secret_key [string trim [ifile get $secret_keyfile]]
+            set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
-            if {[llength [split $secret_key]] != 3} {
-                # Encryption key must be in format compatible with AES::encrypt
+            if { [llength [split $secret_key]] != 3 } {
                 log local0.error "Encryption key has invalid format for client [IP::client_addr]"
+
+                # Encryption key must be in format compatible with AES::encrypt.
+                # Set return code to "invalid input data from APM"
                 set verify_result 1
             } else {
-                set secret_value_dec [call OTP::create_secret $secret_hmac]
+                # Created unencrypted shared secret value
+                set secret_value_dec [call OTP::create_secret $otp(secret_hmac)]
 
-                if {[string length $secret_value_dec] != 0} {
+                if { [string length $secret_value_dec] != 0 } {
+                    # Encrypt shared secret value
                     set secret_value [b64encode [AES::encrypt $secret_key $secret_value_dec]]
 
                     # Extract domain part of email address as an issuer
-                    set issuer [URI::encode [lindex [split $user_mail "@"] 1]]
+                    set issuer [URI::encode [lindex [split $otp(user_mail) "@"] 1]]
 
-                    if {$issuer == ""} {
+                    if { $issuer eq "" } {
                         log local0.error "User has invalid email address for client [IP::client_addr]"
+
+                        # User mail has invalid format. Set return code to
+                        # "invalid input data from APM"
                         set verify_result 1
                     } else {
-                        # Create QR uri
-                        set qr_uri "${issuer}:[URI::encode $user_mail]";
-                        append qr_uri "?secret=$secret_value_dec";
-                        append qr_uri "&issuer=$issuer";
-                        append qr_uri "&algorithm=[string toupper $secret_hmac]";
-                        append qr_uri "&digits=$otp_numdig";
-                        append qr_uri "&period=$timestep_value";
+                        # Create QR uri string
+                        append qr_uri "${issuer}:[URI::encode $otp(user_mail)]";
+                        append qr_uri "?secret=${secret_value_dec}";
+                        append qr_uri "&issuer=${issuer}";
+                        append qr_uri "&algorithm=[string toupper $otp(secret_hmac)]";
+                        append qr_uri "&digits=$otp(otp_numdig)";
+                        append qr_uri "&period=$otp(timestep_value)";
+
+                        # QR code was successfully built. Set return code to
+                        # "shared secret created"
                         set verify_result 0
                     }
                 } else {
+                    log local0.error "Failed to create shared secret value for client [IP::client_addr]"
+
+                    # Failed to create unencrypted shared ssecret value. Set
+                    # return code to "invalid shared secret value"
                     set verify_result 2
                 }
             }
+        } else {
+            log local0.error  "Input data extracted from APM is invalid for client [IP::client_addr]"
+
+            # iRule received invalid data from APM. Set return code to "invalid
+            # input data from APM"
+            set verify_result 1
         }
 
-        if {$static::otp_create_debug == 1} {
-            log local0.debug "verify_result = $verify_result"
-            log local0.debug "secret_value = $secret_value"
+        if { $static::otp_create_debug == 1 } {
+            log local0.debug "verify_result = $verify_result, secret_value = $secret_value"
         }
 
+        # Export session variables to APM
         ACCESS::session data set "session.custom.otp.verify_result" $verify_result
-        ACCESS::session data set -secure "session.custom.otp.secret_value_dec" $secret_value_dec
         ACCESS::session data set "session.custom.otp.secret_value" $secret_value
+        ACCESS::session data set -secure "session.custom.otp.secret_value_dec" $secret_value_dec
         ACCESS::session data set -secure "session.custom.otp.qr_uri" $qr_uri
     }
 }

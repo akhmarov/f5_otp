@@ -9,6 +9,9 @@
 - [Create TMOS SMTP objects](#create-tmos-smtp-objects)
 - [Create APM Active Directory AAA object](#create-apm-active-directory-aaa-object)
 - [Create APM policy](#create-apm-policy)
+- [Create APM hosted content](#create-apm-hosted-content)
+- [Apply APM customization (standard)](#apply-apm-customization-standard)
+- [Apply APM customization (modern)](#apply-apm-customization-modern)
 - [Create OTP-APM virtual server](#create-otp-apm-virtual-server)
 - [Create APM HTTP AAA object](#create-apm-http-aaa-object)
 - [Create OTP-LTM virtual server](#create-otp-ltm-virtual-server)
@@ -99,7 +102,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 17. Select **ilx-extension** from **Log Publisher**. More about **ilx-extension** may be found in [Jason Rahm's article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
 18. Select **LDAP-Modify_space** from **From Workspace**
 
-### Create TMOS SMTP objects
+## Create TMOS SMTP objects
 
 1. Log in to BIG-IP GUI as a user with **Administrator** privileges
 2. Check that current partition is **Common**
@@ -140,8 +143,10 @@ You can safely choose another directory services, like Apache Directory Server, 
 5. Go to *Access -> Profiles / Policies -> Access Profiles (Per-Session Policies)*
 6. Add new policy with name **APM-OTP-Create_access**
 7. Select **All** from **Profile Type**
-8. Select **English (en)** from **Languages**
-9. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description](./POLICY.md) document
+8. Select **Modern** from **Customization Type** if you plan to use modern APM customization (TMOS version **15.1.x** and above)
+9. Select **English (en)** from **Languages**
+10. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description (standard)](./POLICY_STD.md) document if you plan to use standard APM customization or you use legacy software (TMOS version 15.0.x and below)
+11. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description (modern)](./POLICY_MDN.md) document if you plan to use modern APM customization (TMOS version **15.1.x** and above)
 
 ![Policy](../pics/install_vpe1.png)
 ![Macro1](../pics/install_vpe2.png)
@@ -149,8 +154,55 @@ You can safely choose another directory services, like Apache Directory Server, 
 ![Macro3](../pics/install_vpe4.png)
 ![Macro4](../pics/install_vpe5.png)
 ![Macro5](../pics/install_vpe6.png)
-![Macro6](../pics/install_vpe7.png)
+![Macro6](../pics/install_vpe7_std.png)
 ![Macro7](../pics/install_vpe8.png)
+
+## Create APM hosted content
+
+1. Log in to BIG-IP GUI as a user with **Administrator** privileges
+2. Check that current partition is **Common**
+3. Go to *System -> Resource Provisioning* and check that **Access Policy (APM)** is licensed and provisioned. If not you have to enable it. Remember that module reprovision may disrupt traffic processing on BIG-IP
+4. Go to *Access -> Webtops -> Hosted Content -> Manage Files*
+5. Upload new file with name **qrcode.js**
+6. Select file [qrcode.js](../ifiles/qrcode.js)
+7. Select **session** from **Secure Level**
+8. Navigate to **Edit File Properties** and select **JavaScript** from **Mime Type**
+9. Navigate to **Managed Access** and select checkbox for APM profile **/CONTOSO/APM-OTP-Create_access** under **Retain Public Access**
+10. Check that **Publicly Accessible URI** for file **qrcode.js** is **/public/share/qrcode.js**
+
+As you can see QR generator code is a pure JavaScipt code which is stored on BIG-IP and rendered in user's browser, so there were no external connections from OTP configuration portal or user's browser to Google servers, for example. This may be crucial for secure environments.
+
+## Apply APM customization (standard)
+
+1. Log in to BIG-IP GUI as a user with **Administrator** privileges
+2. Check that current partition is **Common**
+3. Go to *System -> Resource Provisioning* and check that **Access Policy (APM)** is licensed and provisioned. If not you have to enable it. Remember that module reprovision may disrupt traffic processing on BIG-IP
+4. Select partition **CONTOSO** to apply APM customization
+5. Go to *Access -> Profiles / Policies -> Customization -> Advanced*
+6. Navigate to *Customization Settings -> Access Profiles -> /CONTOSO/APM-OTP-Create_access -> Macros -> OTP Create -> Message Pages -> QR Display -> message_box.inc*
+7. Find enclosing HTML tag `</head>` and insert on previous line `<script language="JavaScript" src="/public/share/qrcode.js"></script>`
+8. Save Draft
+9. Save all changes
+10. Apply Access Policy
+
+## Apply APM customization (modern)
+
+1. Log in to BIG-IP GUI as a user with **Administrator** privileges
+2. Check that current partition is **Common**
+3. Go to *System -> Resource Provisioning* and check that **Access Policy (APM)** is licensed and provisioned. If not you have to enable it. Remember that module reprovision may disrupt traffic processing on BIG-IP
+4. Select partition **CONTOSO** to apply APM customization
+5. Go to *Access -> Profiles / Policies -> Customization -> General*
+6. Switch from **Branding** to **Text** view
+7. Navigate to *Customization Settings -> Access Profiles -> /CONTOSO/APM-OTP-Create_access -> Common -> External Scripts/Styles*
+8. Add **/public/share/qrcode.js** to **External JavaScript 1 Address**
+9. Execute on local machine command `echo $(openssl dgst -sha384 -binary f5_otp/ifiles/qrcode.js | openssl base64 -A)` to extract SRI hash value
+10. Add extracted SRI hash value to **External JavaScript 1 Subresource Integrity**
+11. Go to *Access -> Profiles / Policies -> Customization -> Advanced*
+12. Navigate to *Customization Settings -> Access Profiles -> /CONTOSO/APM-OTP-Create_access -> Macros -> OTP Create -> Message Pages -> QR Display -> user-message.js*
+13. Insert contents of [user-message.js](../ifiles/user-message.js) file
+14. Save Draft
+15. Save all changes
+16. Apply Access Policy
 
 ## Create OTP-APM virtual server
 
@@ -197,6 +249,7 @@ otp_value %{session.custom.otp.otp_value}
 otp_numdig %{session.custom.otp.otp_numdig}
 timestep_value %{session.custom.otp.timestep_value}
 timestep_num %{session.custom.otp.timestep_num}
+aaa_name %{session.custom.otp.aaa_name}
 user_name %{session.custom.otp.user_name}
 security_attempt %{session.custom.otp.security_attempt}
 security_period %{session.custom.otp.security_period}
@@ -207,7 +260,7 @@ security_delay %{session.custom.otp.security_delay}
 
 TMSH command:
 ```
-create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://192.0.2.2/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }
+create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://192.0.2.2/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} aaa_name %{session.custom.otp.aaa_name} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }
 ```
 
 ## Create OTP-LTM virtual server
@@ -229,6 +282,7 @@ create ltm virtual LTM-OTP-Verify_vs { destination 192.0.2.2:http ip-protocol tc
 ```
 
 ## Upload encryption key
+
 1. Prepare encryption key file in format compatible with **AES::decrypt** command. **This step is crucial because current key stored in file is public and unsafe. Please change it in your environment**
 2. Log in to BIG-IP GUI as a user with **Administrator** privileges
 3. Check that current partition is **Common**

@@ -12,7 +12,7 @@ This solution is based on:
 
 ### Screenshots
 
-![OTP1](pics/readme_otp1.png) ![OTP2](pics/readme_otp2.png)
+![OTP1](pics/readme_otp1.png) ![OTP2](pics/readme_otp2.png) ![OTP3](pics/readme_otp3.png)
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Required systems for this application:
 * SMTP server
 * OTP-compatible generator
 
-\* - tested on version 14.x
+\* - tested on versions 14.1.x, 15.0.x and 15.1.x
 
 ## Installation
 
@@ -42,4 +42,4 @@ Please take a look at the [Architecture Description](docs/ARCH.md) for detailed 
 
 ## Credits
 
-Full list of persons that helped located in [Credits](docs/CREDITS.md)
+Full list of persons that helped me located in [Credits](docs/CREDITS.md)

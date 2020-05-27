@@ -1,7 +1,7 @@
 //
 // Name:     APM-LDAP-Modify_ilx
-// Date:     October 2019
-// Version:  2.0
+// Date:     May 2020
+// Version:  2.3
 //
 // Authors:
 //   Brett Smith
@@ -44,7 +44,7 @@
 'use strict';
 
 // Debug switch
-const ldap_modify_debug = 0;
+const flagDebug = 0;
 
 const f5 = require('f5-nodejs');
 const ldap = require('ldapjs');
@@ -54,25 +54,23 @@ const ilx = new f5.ILXServer();
 const logger = new f5.ILXLogger();
 
 ilx.addMethod('ldap_modify', (req, res) => {
-    const ldap_bind_scheme = req.params()[0];
-    const ldap_bind_fqdn = req.params()[1];
-    const ldap_bind_port = req.params()[2];
-    const ldap_bind_dn = req.params()[3];
-    const ldap_bind_pwd = req.params()[4];
-    const ldap_user_dn = req.params()[5];
-    const ldap_user_attr = req.params()[6];
-    const ldap_user_secret = req.params()[7];
+    const ldapBindScheme = req.params()[0];
+    const ldapBindFqdn = req.params()[1];
+    const ldapBindPort = req.params()[2];
+    const ldapBindDn = req.params()[3];
+    const ldapBindPwd = req.params()[4];
+    const ldapUserDn = req.params()[5];
+    const ldapUserAttr = req.params()[6];
+    const ldapUserSecret = req.params()[7];
 
-    if (ldap_modify_debug) {
-        logger.send('ldap_bind_scheme = ' + ldap_bind_scheme + ', ldap_bind_fqdn = ' + ldap_bind_fqdn + ', ldap_bind_port = ' + ldap_bind_port);
-        logger.send('ldap_bind_dn = ' + ldap_bind_dn + ', ldap_bind_pwd = *');
-        logger.send('ldap_user_dn = ' + ldap_user_dn + ', ldap_user_attr = ' + ldap_user_attr + ', ldap_user_secret = ' + ldap_user_secret);
+    if (flagDebug) {
+        logger.send('ldapBindScheme = ' + ldapBindScheme + ', ldapBindFqdn = ' + ldapBindFqdn + ', ldapBindPort = ' + ldapBindPort + 'ldapBindDn = ' + ldapBindDn + ', ldapBindPwd = *, ldapUserDn = ' + ldapUserDn + ', ldapUserAttr = ' + ldapUserAttr + ', ldapUserSecret = ' + ldapUserSecret);
     }
 
-    if (!ldap_bind_scheme || ldap_bind_scheme.trim().length === 0 || !ldap_bind_fqdn || ldap_bind_fqdn.trim().length === 0
-        || !ldap_bind_port || ldap_bind_port.trim().length === 0 || !ldap_bind_dn || ldap_bind_dn.trim().length === 0
-        || !ldap_bind_pwd || ldap_bind_pwd.trim().length === 0 || !ldap_user_dn || ldap_user_dn.trim().length === 0
-        || !ldap_user_attr || ldap_user_attr.trim().length === 0 || !ldap_user_secret || ldap_user_secret.trim().length === 0)
+    if (!ldapBindScheme || ldapBindScheme.trim().length === 0 || !ldapBindFqdn || ldapBindFqdn.trim().length === 0
+        || !ldapBindPort || ldapBindPort.trim().length === 0 || !ldapBindDn || ldapBindDn.trim().length === 0
+        || !ldapBindPwd || ldapBindPwd.trim().length === 0 || !ldapUserDn || ldapUserDn.trim().length === 0
+        || !ldapUserAttr || ldapUserAttr.trim().length === 0 || !ldapUserSecret || ldapUserSecret.trim().length === 0)
     {
         // Invalid input data from iRule
         logger.send('Invalid input data from iRule');
@@ -82,7 +80,7 @@ ilx.addMethod('ldap_modify', (req, res) => {
 
     var ldapModifyRec = (hosts, ldap_change, i) => {
         return new Promise((resolve, reject) => {
-            var ldap_bind_url = ldap_bind_scheme + hosts[i] + ':' + ldap_bind_port;
+            var ldap_bind_url = ldapBindScheme + hosts[i] + ':' + ldapBindPort;
             var ldap_client = ldap.createClient({url: ldap_bind_url, tlsOptions: {'rejectUnauthorized': false}});
 
             ldap_client.on('error', (error) => {
@@ -90,16 +88,16 @@ ilx.addMethod('ldap_modify', (req, res) => {
                 return reject('LDAP bind error: ' + error);
             });
 
-            ldap_client.bind(ldap_bind_dn, ldap_bind_pwd, (error) => {
+            ldap_client.bind(ldapBindDn, ldapBindPwd, (error) => {
                 if (error) {
                     // LDAP bind failed
                     return reject('LDAP bind error: ' + error);
                 } else {
-                    if (ldap_modify_debug) {
+                    if (flagDebug) {
                         logger.send('LDAP bind success ' + ldap_bind_url);
                     }
                     try {
-                        ldap_client.modify(ldap_user_dn, ldap_change, (error) => {
+                        ldap_client.modify(ldapUserDn, ldap_change, (error) => {
                             ldap_client.unbind((error) => {
                                 if (error) {
                                     // LDAP unbind failed
@@ -125,7 +123,7 @@ ilx.addMethod('ldap_modify', (req, res) => {
 
     var modifyNext = (records, ldap_change, i) => {
         ldapModifyRec(records, ldap_change, i).then(() => {
-            if (ldap_modify_debug) {
+            if (flagDebug) {
                 logger.send('LDAP modify success');
             }
             res.reply(0);
@@ -143,7 +141,7 @@ ilx.addMethod('ldap_modify', (req, res) => {
         });
     };
 
-    dns.resolve(ldap_bind_fqdn, (error, records) => {
+    dns.resolve(ldapBindFqdn, (error, records) => {
         if (error) {
             // DNS resolve failed
             logger.send('DNS resolve error: ' + error);
@@ -151,10 +149,10 @@ ilx.addMethod('ldap_modify', (req, res) => {
             return;
         } else {
             const ldap_modification = {};
-            ldap_modification[ldap_user_attr] = ldap_user_secret;
+            ldap_modification[ldapUserAttr] = ldapUserSecret;
             const ldap_change = new ldap.Change({operation: 'replace', modification: ldap_modification});
 
-            if (ldap_modify_debug) {
+            if (flagDebug) {
                 logger.send('DNS resolve success: ' + records);
             }
 

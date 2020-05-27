@@ -55,7 +55,7 @@ Use this section when you troubleshoot APM policy with name **/CONTOSO/APM-OTP-C
 1. Set varible `static::otp_create_debug` to **1** in file **/Common/APM-OTP-Create_irule**
 2. Set varible `static::otp_verify_apm_debug` to **1** in file **/Common/APM-OTP-Verify_irule**
 3. Set varible `static::ldap_modify_debug` to **1** in file **/Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule**
-4. Set varible `ldap_modify_debug` to **1** in file **/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/index.js**
+4. Set varible `flagDebug` to **1** in file **/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/index.js**
 5. Reload iRules LX plugin from Workspace
 
 Example output from `/var/log/ltm`:
@@ -90,7 +90,7 @@ ZGpuZmFsaXVyaGc7cG93ajtuZUtGR0h3am93b2lhc25jeE9IVVMqKCZZKl4mVComWUlxd2dpeXJkYg==
 1. Set varible `static::otp_create_debug` to **0** in file **/Common/APM-OTP-Create_irule**
 2. Set varible `static::otp_verify_apm_debug` to **0** in file **/Common/APM-OTP-Verify_irule**
 3. Set varible `static::ldap_modify_debug` to **0** in file **/Common/LDAP-Modify_plugin/APM-LDAP-Modify_irule**
-4. Set varible `ldap_modify_debug` to **0** in file **/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/index.js**
+4. Set varible `flagDebug` to **0** in file **/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/index.js**
 5. Reload iRules LX plugin from Workspace
 
 ### OTP verification

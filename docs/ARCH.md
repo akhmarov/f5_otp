@@ -7,6 +7,7 @@
 - [iRules description](#irules-description)
   - [OTP](#otp)
   - [APM-OTP-Create_irule](#apm-otp-create_irule)
+  - [APM-OTP-Trusted_irule](#apm-otp-trusted_irule)
   - [APM-OTP-Verify_irule](#apm-otp-verify_irule)
   - [LTM-OTP-Verify_irule](#ltm-otp-verify_irule)
 - [iRules LX description](#irules-lx-description)
@@ -64,6 +65,27 @@ set otp(user_mail) [ACCESS::session data get "session.custom.otp.user_mail"]
 ```
 
 More about implemented input variables and output data type you can find in [APM-OTP-Create.tcl](../irules/APM-OTP-Create.tcl) file. File contains debug switch `set static::otp_create_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
+
+When you update encryption key that will be used for shared secret value encryption there is a probability that your text editor will add empty line in the end of this file. Below part of code is used to strip this line down:
+```tcl
+set secret_key [string trim [ifile get $secret_keyfile]]
+```
+
+### APM-OTP-Trusted_irule
+
+This iRule is used in APM enabled virtual servers with support of event **ACCESS_POLICY_AGENT_EVENT**. This iRule retrieves session variables from APM and checks whether user presented valid trusted device cookie. This iRule depends on **/Common/OTP** library.
+
+**Variables list**  
+```tcl
+set otp(secret_keyfile) [ACCESS::session data get "session.custom.otp.secret_keyfile"]
+set otp(trusted_flag) [ACCESS::session data get "session.custom.otp.trusted_flag"]
+set otp(trusted_ckval) [ACCESS::session data get "session.custom.otp.trusted_ckval"]
+set otp(trusted_cktime) [ACCESS::session data get "session.custom.otp.trusted_cktime"]
+```
+
+More about implemented input variables and output data type you can find in [APM-OTP-Trusted.tcl](../irules/APM-OTP-Trusted.tcl) file. File contains debug switch `set static::otp_trusted_apm_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
+
+Because trusted cookie value must be delivered to client's browser in the middle of the APM session evaluation process there is a special command **ACCESS::restrict_irule_events disable** under the **CLIENT_ACCEPTED** event. This command allows interception of common HTTP requests that are generated and processed by the APM daemon. This trick allows trusted device cookie usage for IdP/SP-initiated SAML APM policies.
 
 When you update encryption key that will be used for shared secret value encryption there is a probability that your text editor will add empty line in the end of this file. Below part of code is used to strip this line down:
 ```tcl
@@ -173,9 +195,8 @@ Before debugging strange NodeJS errors on BIG-IP you can try to use [test_ldap.j
 
 ## Notes
 
-* Application does not support token removal. You have to clear Active Directory attribute manually
+* Application does not support token removal. You have to clear Active Directory attribute manually. See [Implementation Guide](docs/IMPLEMENT.md) for instructions on how to do this
 * Time for BIG-IP and OTP generator must be synchronized
-* Trusted devices are not implemented
 
 ## Caveats
 

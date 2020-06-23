@@ -1,7 +1,7 @@
 #
 # Name:     LTM-OTP-Verify_irule
-# Date:     May 2020
-# Version:  2.3
+# Date:     June 2020
+# Version:  2.4
 #
 # Authors:
 #   George Watkins
@@ -112,6 +112,9 @@ when HTTP_REQUEST priority 500 {
                 # "invalid input data"
                 set verify_result 1
             }
+
+            # Secure unused variable
+            unset -- otp
         }
         default {
             log local0.error "Requested invalid URL for client [IP::client_addr]"

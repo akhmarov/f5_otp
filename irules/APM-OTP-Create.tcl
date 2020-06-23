@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Create_irule
-# Date:     May 2020
-# Version:  2.3
+# Date:     June 2020
+# Version:  2.4
 #
 # Authors:
 #   Vladimir Akhmarov
@@ -66,7 +66,13 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 # Created unencrypted shared secret value
                 set secret_value_dec [call OTP::create_secret $otp(secret_hmac)]
 
-                if { [string length $secret_value_dec] != 0 } {
+                if { [string length $secret_value_dec] == 0 } {
+                    log local0.error "Failed to create shared secret value for client [IP::client_addr]"
+
+                    # Failed to create unencrypted shared ssecret value. Set
+                    # return code to "invalid shared secret value"
+                    set verify_result 2
+                } else {
                     # Encrypt shared secret value
                     set secret_value [b64encode [AES::encrypt $secret_key $secret_value_dec]]
 
@@ -92,16 +98,10 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                         # "shared secret created"
                         set verify_result 0
                     }
-                } else {
-                    log local0.error "Failed to create shared secret value for client [IP::client_addr]"
-
-                    # Failed to create unencrypted shared ssecret value. Set
-                    # return code to "invalid shared secret value"
-                    set verify_result 2
                 }
             }
         } else {
-            log local0.error  "Input data extracted from APM is invalid for client [IP::client_addr]"
+            log local0.error "Input data extracted from APM is invalid for client [IP::client_addr]"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -117,5 +117,8 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         ACCESS::session data set "session.custom.otp.secret_value" $secret_value
         ACCESS::session data set -secure "session.custom.otp.secret_value_dec" $secret_value_dec
         ACCESS::session data set -secure "session.custom.otp.qr_uri" $qr_uri
+
+        # Secure unused variable
+        unset -- otp
     }
 }

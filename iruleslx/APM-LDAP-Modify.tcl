@@ -1,7 +1,7 @@
 #
 # Name:     APM-LDAP-Modify_irule
-# Date:     May 2020
-# Version:  2.3
+# Date:     June 2020
+# Version:  2.4
 #
 # Authors:
 #   Brett Smith
@@ -91,5 +91,8 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
 
         # Export session variables to APM
         ACCESS::session data set "session.custom.ldap.modify_result" $ldap_modify_result
+
+        # Secure unused variable
+        unset -- ldap
     }
 }

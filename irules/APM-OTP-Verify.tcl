@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Verify_irule
-# Date:     May 2020
-# Version:  2.3
+# Date:     June 2020
+# Version:  2.4
 #
 # Authors:
 #   George Watkins
@@ -78,7 +78,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
             if { [llength [split $secret_key]] != 3 } {
                 log local0.error "Encryption key has invalid format for client [IP::client_addr]"
 
-                # Encryption key must be in format compatible with AES::encrypt.
+                # Encryption key must be in format compatible with AES::decrypt.
                 # Set return code to "invalid input data from APM"
                 set verify_result 1
             } else {
@@ -115,7 +115,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 }
             }
         } else {
-            log local0.error  "Input data extracted from APM is invalid for client [IP::client_addr]"
+            log local0.error "Input data extracted from APM is invalid for client [IP::client_addr]"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -128,5 +128,8 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
 
         # Export session variables to APM
         ACCESS::session data set "session.custom.otp.verify_result" $verify_result
+
+        # Secure unused variable
+        unset -- otp
     }
 }

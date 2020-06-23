@@ -53,7 +53,7 @@ Example list of external objects:
 * CONTOSO
 * /CONTOSO/PFS_clientssl
 * 192.0.2.1
-* 192.0.2.2
+* ltm-otp.contoso.com (resolves to 192.0.2.2)
 * ldap://
 * corp.contoso.com (resolves to 198.51.100.10 and 198.51.100.11)
 * 389
@@ -78,8 +78,9 @@ You can safely choose another directory services, like Apache Directory Server, 
 3. Go to *Local Traffic -> iRules -> iRule List*
 4. Add iRule with name **OTP** and paste contents of [OTP.tcl](../irules/OTP.tcl) file
 5. Add iRule with name **APM-OTP-Create_irule** and paste contents of [APM-OTP-Create.tcl](../irules/APM-OTP-Create.tcl) file
-6. Add iRule with name **APM-OTP-Verify_irule** and paste contents of [APM-OTP-Verify.tcl](../irules/APM-OTP-Verify.tcl) file
-7. Add iRule with name **LTM-OTP-Verify_irule** and paste contents of [LTM-OTP-Verify.tcl](../irules/LTM-OTP-Verify.tcl) file
+6. Add iRule with name **APM-OTP-Trusted_irule** and paste contents of [APM-OTP-Trusted.tcl](../irules/APM-OTP-Trusted.tcl) file
+7. Add iRule with name **APM-OTP-Verify_irule** and paste contents of [APM-OTP-Verify.tcl](../irules/APM-OTP-Verify.tcl) file
+8. Add iRule with name **LTM-OTP-Verify_irule** and paste contents of [LTM-OTP-Verify.tcl](../irules/LTM-OTP-Verify.tcl) file
 
 ## Create BIG-IP iRules LX
 
@@ -145,7 +146,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 7. Select **All** from **Profile Type**
 8. Select **Modern** from **Customization Type** if you plan to use modern APM customization (TMOS version **15.1.x** and above)
 9. Select **English (en)** from **Languages**
-10. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description (standard)](./POLICY_STD.md) document if you plan to use standard APM customization or you use legacy software (TMOS version 15.0.x and below)
+10. Use Visual Policy Editor to apply Access Policy as explained in [Policy Description (standard)](./POLICY_STD.md) document if you plan to use standard APM customization or you use legacy software (TMOS version 15.0.x and below)
 11. Use Visual Policy Editor to apply Access Policy as shown below and explained in [Policy Description (modern)](./POLICY_MDN.md) document if you plan to use modern APM customization (TMOS version **15.1.x** and above)
 
 ![Policy](../pics/install_vpe1.png)
@@ -239,7 +240,7 @@ create ltm virtual /CONTOSO/APM-OTP-Create_vs { destination /CONTOSO/192.0.2.1:h
 5. Add new HTTP server with name **LTM-OTP-Verify_http**
 6. Select **Form Based** from **Authentication Type**
 7. Select **GET** from **Form Method**
-8. Add **http://192.0.2.2/otp_verify** to **Form Action**, where 192.0.2.2 is an IP address which will be used for LTM based OTP verification virtual server
+8. Add **http://ltm-otp.contoso.com/otp_verify** to **Form Action**, where ltm-otp.contoso.com resolves to IP address 192.0.2.2 which will be used for LTM based OTP verification virtual server
 9. Add below text to **Hidden Form Parameters/Values**:
 ```
 secret_value %{session.custom.otp.secret_value}
@@ -260,7 +261,7 @@ security_delay %{session.custom.otp.security_delay}
 
 TMSH command:
 ```
-create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://192.0.2.2/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} aaa_name %{session.custom.otp.aaa_name} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }
+create apm aaa http LTM-OTP-Verify_http { auth-type form-based form-action http://ltm-otp.contoso.com/otp_verify form-fields "secret_value %{session.custom.otp.secret_value} secret_keyfile %{session.custom.otp.secret_keyfile} secret_hmac %{session.custom.otp.secret_hmac} otp_value %{session.custom.otp.otp_value} otp_numdig %{session.custom.otp.otp_numdig} timestep_value %{session.custom.otp.timestep_value} timestep_num %{session.custom.otp.timestep_num} aaa_name %{session.custom.otp.aaa_name} user_name %{session.custom.otp.user_name} security_attempt %{session.custom.otp.security_attempt} security_period %{session.custom.otp.security_period} security_delay %{session.custom.otp.security_delay}" form-method get success-match-type string success-match-value "200 OK" }
 ```
 
 ## Create OTP-LTM virtual server

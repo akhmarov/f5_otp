@@ -9,3 +9,5 @@ Would like to thank:
 * [@pavenkostanislav](https://github.com/pavenkostanislav) for adapting NodeJS code
 * [@ZigYu](https://github.com/ZigYu) for adapting NodeJS code
 * [@nickolaylavrinenko](https://github.com/nickolaylavrinenko) for adapting pReact code
+* Niels van Sluis for [article on DevCentral](https://devcentral.f5.com/s/articles/Suppress-MFA-for-a-period-of-time)
+* Slayer001 for [comments on article on DevCentral](https://devcentral.f5.com/s/articles/Suppress-MFA-for-a-period-of-time)

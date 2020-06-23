@@ -1,7 +1,7 @@
 #
 # Name:     OTP
-# Date:     May 2020
-# Version:  2.3
+# Date:     June 2020
+# Version:  2.4
 #
 # Authors:
 #   George Watkins
@@ -39,7 +39,8 @@ proc create_secret {algo} {
         00000 A 00001 B 00010 C 00011 D 00100 E 00101 F 00110 G 00111 H \
         01000 I 01001 J 01010 K 01011 L 01100 M 01101 N 01110 O 01111 P \
         10000 Q 10001 R 10010 S 10011 T 10100 U 10101 V 10110 W 10111 X \
-        11000 Y 11001 Z 11010 2 11011 3 11100 4 11101 5 11110 6 11111 7]
+        11000 Y 11001 Z 11010 2 11011 3 11100 4 11101 5 11110 6 11111 7 \
+    ]
 
     # Hash algorithm output data length in bits. Must be a multiple of 8
     array set hmac_len {
@@ -159,7 +160,8 @@ proc verify_hotp {algo secret digit otp counter} {
         I 01000 J 01001 K 01010 L 01011 M 01100 N 01101 O 01110 P 01111 \
         Q 10000 R 10001 S 10010 T 10011 U 10100 V 10101 W 10110 X 10111 \
         Y 11000 Z 11001 2 11010 3 11011 4 11100 5 11101 6 11110 7 11111 \
-        0 "" 1 "" = "" " " ""]
+        0 "" 1 "" = "" " " "" \
+    ]
 
     # Google Authenticator hardcoded key length in bits. Must be 80
     set ga_len 80
@@ -359,7 +361,7 @@ proc check_input {var_array flag_debug} {
     }
 
     if { $flag_debug == 1 } {
-        log local0.debug "check_input: [join $debug_list ", "]"
+        log local0.debug "check_input: [join $debug_list {, }]"
     }
 
     # Return calculated value

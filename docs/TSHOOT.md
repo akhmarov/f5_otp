@@ -7,6 +7,7 @@
 - [iRules and iRules LX debug logs](#irules-and-irules-lx-debug-logs)
   - [OTP modification](#otp-modification)
   - [OTP verification](#otp-verification)
+  - [TD verification](#td-verification)
 
 ---
 
@@ -112,3 +113,30 @@ Example output from `/var/log/ltm`:
 **Disable debug logs**
 1. Set varible `static::otp_verify_apm_debug` to **0** in file **/Common/APM-OTP-Verify_irule**
 2. Set varible `static::otp_verify_ltm_debug` to **0** in file **/Common/LTM-OTP-Verify_irule**
+
+### TD verification
+
+Use this section when you troubleshoot custom OTP enabled application with Trusted Device (TD) support.
+
+**Enable debug logs**
+1. Set varible `static::otp_trusted_apm_debug` to **1** in file **/Common/APM-OTP-Trusted_irule**
+
+Example output from `/var/log/ltm` when trusted device cookie was generated and assigned:
+```
+2020-06-23T18:57:18.775+03:00 bigip01 debug tmm2[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_SESSION_STARTED>: trusted_ckval = TN1
+2020-06-23T18:57:34.103+03:00 bigip01 debug tmm3[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_POLICY_AGENT_EVENT>: check_input: trusted_flag = 1, secret_keyfile = /CONTOSO/otpenc-key, trusted_ckval = TN1, trusted_cktime = 604800
+2020-06-23T18:57:34.103+03:00 bigip01 debug tmm3[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_POLICY_AGENT_EVENT>: trusted_ckval (before encryption) = john:uimode=0&ctype=IE&cversion=11&cjs=1&cactivex=1&cplugin=0&cplatform=Win8.1&cpu=WOW64&ccustom_protocol=1::Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; MALNJS; rv:11.0) like Gecko:1592927838
+2020-06-23T18:57:34.105+03:00 bigip01 debug tmm3[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_POLICY_AGENT_EVENT>: trusted_result = 2
+2020-06-23T18:57:35.854+03:00 bigip01 debug tmm1[22203]: Rule /Common/APM-OTP-Trusted_irule <HTTP_RESPONSE_RELEASE>: Trusted cookie inserted (trusted_flag = 0)
+```
+
+Example output from `/var/log/ltm` when trusted device cookie was presented by user for verification:
+```
+2020-06-23T18:58:11.779+03:00 bigip01 debug tmm1[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_SESSION_STARTED>: trusted_ckval = +jO/pTV2kYv/GkRsMGmfnDb4MPBPggri9wDRzmVuAr0X63ykquajlyxbQ/8ssMSzsCLIRz8R3qLSapuqtzIveZPsC+zHIYO4ng2Khnt4olMIS7J1BOVJ+zkwbD1lNx9h53lqq3Xh88a1BvItxKrr0vMpb1Xba0nZlQuRsZ0r4Kgt12eco3s0f10dH/NUDJ0T3gHe9ACWOUe2E1Z9OQ45lbu/LsPgDcoTRpnCDFWcR5IiFcAss8ru6+aN3LcdeqbCRJ9mZ/9f3uXv+ewqnjq4KjtQ/RYkRJd7Z4WbM4ZzJ7aGw5Z1Vvwu89f/E5FJHgHvqblOQs5bOxP/t7IURdI6IvS15hUQ2G1bF8ZKEb62xbk7MMDi0FSz8SM7K/4RAAAAAQ==
+2020-06-23T18:58:17.826+03:00 bigip01 debug tmm2[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_POLICY_AGENT_EVENT>: check_input: trusted_flag = 0, secret_keyfile = /CONTOSO/otpenc-key, trusted_ckval = +jO/pTV2kYv/GkRsMGmfnDb4MPBPggri9wDRzmVuAr0X63ykquajlyxbQ/8ssMSzsCLIRz8R3qLSapuqtzIveZPsC+zHIYO4ng2Khnt4olMIS7J1BOVJ+zkwbD1lNx9h53lqq3Xh88a1BvItxKrr0vMpb1Xba0nZlQuRsZ0r4Kgt12eco3s0f10dH/NUDJ0T3gHe9ACWOUe2E1Z9OQ45lbu/LsPgDcoTRpnCDFWcR5IiFcAss8ru6+aN3LcdeqbCRJ9mZ/9f3uXv+ewqnjq4KjtQ/RYkRJd7Z4WbM4ZzJ7aGw5Z1Vvwu89f/E5FJHgHvqblOQs5bOxP/t7IURdI6IvS15hUQ2G1bF8ZKEb62xbk7MMDi0FSz8SM7K/4RAAAAAQ==, trusted_cktime = 604800
+2020-06-23T18:58:17.826+03:00 bigip01 debug tmm2[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_POLICY_AGENT_EVENT>: trusted_ckval (after decryption) = john:uimode=0&ctype=IE&cversion=11&cjs=1&cactivex=1&cplugin=0&cplatform=Win8.1&cpu=WOW64&ccustom_protocol=1::Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; MALNJS; rv:11.0) like Gecko:1592927838
+2020-06-23T18:58:17.826+03:00 bigip01 debug tmm2[22203]: Rule /Common/APM-OTP-Trusted_irule <ACCESS_POLICY_AGENT_EVENT>: trusted_result = 0
+```
+
+**Disable debug logs**
+1. Set varible `static::otp_trusted_apm_debug` to **0** in file **/Common/APM-OTP-Trusted_irule**

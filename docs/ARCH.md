@@ -195,7 +195,7 @@ Before debugging strange NodeJS errors on BIG-IP you can try to use [test_ldap.j
 
 ## Notes
 
-* Application does not support token removal. You have to clear Active Directory attribute manually. See [Implementation Guide](docs/IMPLEMENT.md) for instructions on how to do this
+* Application does not support token removal. You have to clear Active Directory attribute manually. See [Implementation Guide](IMPLEMENT.md) for instructions on how to do this
 * Time for BIG-IP and OTP generator must be synchronized
 
 ## Caveats

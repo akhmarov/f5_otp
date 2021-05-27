@@ -1,7 +1,7 @@
 #
 # Name:     LTM-OTP-Verify_irule
-# Date:     June 2020
-# Version:  2.4
+# Date:     May 2021
+# Version:  2.5
 #
 # Authors:
 #   George Watkins
@@ -62,19 +62,22 @@ when HTTP_REQUEST priority 500 {
             set otp(security_period) [URI::decode [URI::query [HTTP::uri] security_period]]
             set otp(security_delay) [URI::decode [URI::query [HTTP::uri] security_delay]]
 
+            # Extract client IP from the request
+            set client [getfield [IP::client_addr] "%" 1]
+
             if { [call OTP::check_input [array get otp] $static::otp_verify_ltm_debug] } {
                 # Extract decryption key from iFile
                 set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
                 if { [llength [split $secret_key]] != 3 } {
-                    log local0.error "Decryption key has invalid format for client [IP::client_addr]"
+                    log local0.err "Decryption key has invalid format for client $client"
 
                     # Decryption key must be in format compatible with
                     # AES::decrypt. Set return code to "invalid input data"
                     set verify_result 1
                 } else {
                     if { [catch { b64decode $otp(secret_value) } {result}] } {
-                        log local0.error "Secret value has invalid format for client [IP::client_addr]"
+                        log local0.err "Secret value has invalid format for client $client"
 
                         # Secret value must be in format compatible with b64decode.
                         # Set return code to "invalid input data from APM"
@@ -106,7 +109,7 @@ when HTTP_REQUEST priority 500 {
                     }
                 }
             } else {
-                log local0.error "Input data extracted from HTTP URI is invalid for client [IP::client_addr]"
+                log local0.err "Input data extracted from HTTP URI is invalid for client $client"
 
                 # iRule received invalid data from HTTP URI. Set return code to
                 # "invalid input data"
@@ -117,7 +120,7 @@ when HTTP_REQUEST priority 500 {
             unset -- otp
         }
         default {
-            log local0.error "Requested invalid URL for client [IP::client_addr]"
+            log local0.err "Requested invalid URL for client $client"
 
             # Requested URL is not implemented. Set return code to "invalid URL"
             set verify_result 4

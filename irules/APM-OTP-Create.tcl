@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Create_irule
-# Date:     June 2020
-# Version:  2.4
+# Date:     May 2021
+# Version:  2.5
 #
 # Authors:
 #   Vladimir Akhmarov
@@ -52,12 +52,18 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         set otp(timestep_value) [ACCESS::session data get "session.custom.otp.timestep_value"]
         set otp(user_mail) [ACCESS::session data get "session.custom.otp.user_mail"]
 
+        # Extract client IP from the request
+        set client [getfield [IP::client_addr] "%" 1]
+
+        # Retrieve session identifier from APM
+        set sid [ACCESS::session sid]
+
         if { [call OTP::check_input [array get otp] $static::otp_create_debug] } {
             # Extract encryption key from iFile
             set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
             if { [llength [split $secret_key]] != 3 } {
-                log local0.error "Encryption key has invalid format for client [IP::client_addr]"
+                log local0.err "Encryption key has invalid format for session $sid for client $client"
 
                 # Encryption key must be in format compatible with AES::encrypt.
                 # Set return code to "invalid input data from APM"
@@ -67,41 +73,49 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 set secret_value_dec [call OTP::create_secret $otp(secret_hmac)]
 
                 if { [string length $secret_value_dec] == 0 } {
-                    log local0.error "Failed to create shared secret value for client [IP::client_addr]"
+                    log local0.err "Failed to create shared secret value for session $sid for client $client"
 
-                    # Failed to create unencrypted shared ssecret value. Set
+                    # Failed to create unencrypted shared secret value. Set
                     # return code to "invalid shared secret value"
                     set verify_result 2
                 } else {
                     # Encrypt shared secret value
                     set secret_value [b64encode [AES::encrypt $secret_key $secret_value_dec]]
 
-                    # Extract domain part of email address as an issuer
-                    set issuer [URI::encode [lindex [split $otp(user_mail) "@"] 1]]
+                    if { [string length $secret_value] == 0 } {
+                        log local0.err "Failed to encode shared secret value for session $sid for client $client"
 
-                    if { $issuer eq "" } {
-                        log local0.error "User has invalid email address for client [IP::client_addr]"
-
-                        # User mail has invalid format. Set return code to
-                        # "invalid input data from APM"
-                        set verify_result 1
+                        # Failed to encode encrypted shared secret value. Set
+                        # return code to "invalid shared secret value"
+                        set verify_result 2
                     } else {
-                        # Create QR uri string
-                        append qr_uri "${issuer}:[URI::encode $otp(user_mail)]";
-                        append qr_uri "?secret=${secret_value_dec}";
-                        append qr_uri "&issuer=${issuer}";
-                        append qr_uri "&algorithm=[string toupper $otp(secret_hmac)]";
-                        append qr_uri "&digits=$otp(otp_numdig)";
-                        append qr_uri "&period=$otp(timestep_value)";
+                        # Extract domain part of email address as an issuer
+                        set issuer [URI::encode [lindex [split $otp(user_mail) "@"] 1]]
 
-                        # QR code was successfully built. Set return code to
-                        # "shared secret created"
-                        set verify_result 0
+                        if { $issuer eq "" } {
+                            log local0.err "User has invalid email address for session $sid for client $client"
+
+                            # User mail has invalid format. Set return code to
+                            # "invalid input data from APM"
+                            set verify_result 1
+                        } else {
+                            # Create QR uri string
+                            append qr_uri "${issuer}:[URI::encode $otp(user_mail)]";
+                            append qr_uri "?secret=${secret_value_dec}";
+                            append qr_uri "&issuer=${issuer}";
+                            append qr_uri "&algorithm=[string toupper $otp(secret_hmac)]";
+                            append qr_uri "&digits=$otp(otp_numdig)";
+                            append qr_uri "&period=$otp(timestep_value)";
+
+                            # QR code was successfully built. Set return code to
+                            # "shared secret created"
+                            set verify_result 0
+                        }
                     }
                 }
             }
         } else {
-            log local0.error "Input data extracted from APM is invalid for client [IP::client_addr]"
+            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -114,8 +128,16 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
 
         # Export session variables to APM
         ACCESS::session data set "session.custom.otp.verify_result" $verify_result
-        ACCESS::session data set "session.custom.otp.secret_value" $secret_value
-        ACCESS::session data set -secure "session.custom.otp.secret_value_dec" $secret_value_dec
+        if { [info exists secret_value] } {
+            ACCESS::session data set "session.custom.otp.secret_value" $secret_value
+        } else {
+            ACCESS::session data set "session.custom.otp.secret_value" "TCL_ERROR"
+        }
+        if { [info exists secret_value_dec] } {
+            ACCESS::session data set -secure "session.custom.otp.secret_value_dec" $secret_value_dec
+        } else {
+            ACCESS::session data set -secure "session.custom.otp.secret_value_dec" "TCL_ERROR"
+        }
         ACCESS::session data set -secure "session.custom.otp.qr_uri" $qr_uri
 
         # Secure unused variable

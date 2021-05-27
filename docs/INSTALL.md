@@ -34,26 +34,28 @@ OTP application consists of:
 2. BIG-IP client SSL profile. Select a client SSL profile with Perfect Forward Secrecy (PFS) configured
 3. IP address for OTP-APM virtual server. This address will be used for an OTP configuration portal
 4. IP address for OTP-LTM virtual server. This address will be used for applications that do not support APM **iRule Event**
-5. LDAP scheme. Valid values are **ldap://** or **ldaps://**. First is recommended for usage because second leads to strange errors which are sourced from *ldapjs* NPM package
-6. LDAP fully qualified domain name. DNS domain name or host name if you use single LDAP server. For example, if you have Active Directory with **corp.contoso.com** DNS domain name which resolves to more than one Active Directory Domain Controller, it will be the best available option (from the High-Availability perspective). iRule LX will resolve FQDN to all available server names and try each one in case previous failed
-7. LDAP port. Valid values are **389** or **636**. First is recommended for usage because second leads to strange errors which are sourced from *ldapjs* NPM package
-8. LDAP user distinguished name. Distinguished name of Active Directory user with permissions to modify attribute selected to store encrypted OTP secret value
-9. LDAP user password. Password for Active Directory user
-10. LDAP attribure. Name of the Active Directory attribure to store encrypted OTP secret value. Standard implementation uses attribute name **extensionAttribute2**, but you are free to choose another one. Selected attribute must be available for read/write operations for LDAP user
-11. LDAP group distinguished name. Distinguished name of Active Directory group that will allow access to OTP configuration portal. Standard implementation uses **Fetch Nested Groups** AD Query option, so this group may be nested in Active Directory
-12. SMTP server host name. FQDN of SMTP server that is able to deliver email to BIG-IP administrators and users. Server must support authenticated and nonauthenticated connections. Authenticated connection is used to deliver messages to BIG-IP administrators and unauthenticated connection is used to deliver noreply messages to regular users
-13. SMTP user. Username for authenticated SMTP connection
-14. SMTP password. Password for authenticated SMTP connection
-15. SMTP address for BIG-IP administrators. Email address of BIG-IP administrators that will receive **Internal Error** messages
-16. SMTP address for noreply. Email address that is not available for reply, this address will be used for mesasges delivered to users
-17. LDAP administrator login. SamAccountName of the Active Directory administrator to be used for Active Directory AAA object. This account must be a member of **CONTOSO\Domain Admins** group to fetch Active Directory password policies to support password-related functionality
-18. LDAP administrator password. Password for Active Directory administrator
+5. IP addresses of DNS servers that are able to resolve LDAP fully qualified domain name
+6. LDAP scheme. Valid values are **ldap://** or **ldaps://**. First is recommended for usage because second leads to strange errors which are sourced from *ldapjs* NPM package
+7. LDAP fully qualified domain name. DNS domain name or host name if you use single LDAP server. For example, if you have Active Directory with **corp.contoso.com** DNS domain name which resolves to more than one Active Directory Domain Controller, it will be the best available option (from the High-Availability perspective). iRule LX will resolve FQDN to all available server names and try each one in case previous failed
+8. LDAP port. Valid values are **389** or **636**. First is recommended for usage because second leads to strange errors which are sourced from *ldapjs* NPM package
+9. LDAP user distinguished name. Distinguished name of Active Directory user with permissions to modify attribute selected to store encrypted OTP secret value
+10. LDAP user password. Password for Active Directory user
+11. LDAP attribure. Name of the Active Directory attribure to store encrypted OTP secret value. Standard implementation uses attribute name **extensionAttribute2**, but you are free to choose another one. Selected attribute must be available for read/write operations for LDAP user
+12. LDAP group distinguished name. Distinguished name of Active Directory group that will allow access to OTP configuration portal. Standard implementation uses **Fetch Nested Groups** AD Query option, so this group may be nested in Active Directory
+13. SMTP server host name. FQDN of SMTP server that is able to deliver email to BIG-IP administrators and users. Server must support authenticated and nonauthenticated connections. Authenticated connection is used to deliver messages to BIG-IP administrators and unauthenticated connection is used to deliver noreply messages to regular users
+14. SMTP user. Username for authenticated SMTP connection
+15. SMTP password. Password for authenticated SMTP connection
+16. SMTP address for BIG-IP administrators. Email address of BIG-IP administrators that will receive **Internal Error** messages
+17. SMTP address for noreply. Email address that is not available for reply, this address will be used for mesasges delivered to users
+18. LDAP administrator login. SamAccountName of the Active Directory administrator to be used for Active Directory AAA object. This account must be a member of **CONTOSO\Domain Admins** group to fetch Active Directory password policies to support password-related functionality
+19. LDAP administrator password. Password for Active Directory administrator
 
 Example list of external objects:
 * CONTOSO
 * /CONTOSO/PFS_clientssl
-* 192.0.2.1
-* ltm-otp.contoso.com (resolves to 192.0.2.2)
+* 192.0.2.1 (for otp.contoso.com)
+* 192.0.2.2 (for ltm-otp.contoso.com)
+* 198.51.100.10 and 198.51.100.11
 * ldap://
 * corp.contoso.com (resolves to 198.51.100.10 and 198.51.100.11)
 * 389
@@ -288,7 +290,7 @@ create ltm virtual LTM-OTP-Verify_vs { destination 192.0.2.2:http ip-protocol tc
 2. Log in to BIG-IP GUI as a user with **Administrator** privileges
 3. Check that current partition is **Common**
 4. Go to *System -> File Management -> iFile List*
-5. Import file **ifiles/domain-otpenc.key** with name **CONTOSO-otpenc-key**, where CONTOSO is a domain/tenant name
+5. Import file [domain-otpenc.key](../ifiles/domain-otpenc.key) with name **CONTOSO-otpenc-key**, where CONTOSO is a domain/tenant name
 6. Select partition **CONTOSO** to create a new iFile
 7. Go to *Local Traffic -> iRules -> iFile List*
 8. Add new iFile with name **otpenc-key**

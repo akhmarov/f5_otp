@@ -75,6 +75,7 @@ Type = Variable Assign
 `session.custom.ldap.user_dn` = `mcget {session.ad.last.attr.dn}`  
 `session.custom.ldap.user_attr` = `return {extensionAttribute2}`  
 `session.custom.ldap.user_value` = `mcget -nocache {session.custom.otp.secret_value}`  
+`session.custom.ldap.resolver` = `return {198.51.100.10|198.51.100.11}`  
 
 **LDAP Modify**  
 Type = iRule Event  
@@ -115,7 +116,7 @@ Server = **/CONTOSO/ActiveDirectory_aaa**
 SearchFilter = `sAMAccountName=%{session.logon.last.username}`  
 Fetch Nested Groups = Enabled  
 Required Attributes: **dn**, **extensionAttribute2**, **mail**, **memberOf**, **sAMAccountName**  
-No Mail = `expr {[mcget {session.ad.last.attr.mail}] eq ""}`  
+No Mail = `expr {[string trim [mcget {session.ad.last.attr.mail}]] eq ""}`  
 memberOf and OTP = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget {session.ad.last.attr.memberOf}]] && [mcget {session.ad.last.attr.extensionAttribute2}] ne ""}`  
 memberOf = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget {session.ad.last.attr.memberOf}]]}`  
 

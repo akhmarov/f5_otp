@@ -1,7 +1,7 @@
 #
 # Name:     APM-LDAP-Modify_irule
-# Date:     June 2020
-# Version:  2.4
+# Date:     May 2021
+# Version:  2.6
 #
 # Authors:
 #   Brett Smith
@@ -15,11 +15,14 @@
 #   session.custom.ldap.bind_scheme - LDAP scheme (ldap:// or ldaps://)
 #   session.custom.ldap.bind_fqdn - LDAP fully qualified domain name or hostname
 #   session.custom.ldap.bind_port - LDAP port (389 or 636)
-#   session.custom.ldap.bind_dn - Distinguished name of a LDAP administrator with selected attribute modification permissions
+#   session.custom.ldap.bind_dn - Distinguished name of a LDAP administrator
+#     with selected attribute modification permissions
 #   session.custom.ldap.bind_pwd - Password of a LDAP administrator [secure]
 #   session.custom.ldap.user_dn - Distinguished name of a current APM user
 #   session.custom.ldap.user_attr - Selected LDAP attribute
 #   session.custom.ldap.user_value - New LDAP attribute value
+#   session.custom.ldap.resolver - list of IP addresses of DNS resolvers for
+#     LDAP fully qualified domain name or hostname (using "|" as a separator)
 #
 # APM session variables (output):
 #   session.custom.ldap.modify_result - Return Code
@@ -57,6 +60,13 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         set ldap(user_dn) [ACCESS::session data get "session.custom.ldap.user_dn"]
         set ldap(user_attr) [ACCESS::session data get "session.custom.ldap.user_attr"]
         set ldap(user_value) [ACCESS::session data get "session.custom.ldap.user_value"]
+        set ldap(resolver) [ACCESS::session data get "session.custom.ldap.resolver"]
+
+        # Extract client IP from the request
+        set client [getfield [IP::client_addr] "%" 1]
+
+        # Retrieve session identifier from APM
+        set sid [ACCESS::session sid]
 
         if { [call OTP::check_input [array get ldap] $static::ldap_modify_debug] } {
             # Prepare iRules LX handler
@@ -66,8 +76,8 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 log local0.debug "ilx_handle = $ilx_handle"
             }
 
-            if { [catch { ILX::call $ilx_handle -timeout $static::ldap_modify_ilx_time $static::ldap_modify_ilx_method $ldap(bind_scheme) $ldap(bind_fqdn) $ldap(bind_port) $ldap(bind_dn) $ldap(bind_pwd) $ldap(user_dn) $ldap(user_attr) $ldap(user_value) } {result}] } {
-                log local0.error "ILX call failed for client [IP::client_addr] with error: $result"
+            if { [catch { ILX::call $ilx_handle -timeout $static::ldap_modify_ilx_time $static::ldap_modify_ilx_method $ldap(bind_scheme) $ldap(bind_fqdn) $ldap(bind_port) $ldap(bind_dn) $ldap(bind_pwd) $ldap(user_dn) $ldap(user_attr) $ldap(user_value) $ldap(resolver) } {result}] } {
+                log local0.err "ILX call failed \($result\) for session $sid for client $client"
 
                 # iRules LX handler execution failed. Set return code to "iRules
                 # LX call failed"
@@ -78,7 +88,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 set ldap_modify_result $result
             }
         } else {
-            log local0.error "Input data extracted from APM is invalid for client [IP::client_addr]"
+            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"

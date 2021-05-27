@@ -8,6 +8,7 @@
   - [OTP modification](#otp-modification)
   - [OTP verification](#otp-verification)
   - [TD verification](#td-verification)
+- [NPM updates](#npm-updates)
 
 ---
 
@@ -140,3 +141,11 @@ Example output from `/var/log/ltm` when trusted device cookie was presented by u
 
 **Disable debug logs**
 1. Set varible `static::otp_trusted_apm_debug` to **0** in file **/Common/APM-OTP-Trusted_irule**
+
+## NPM updates
+
+During normal BIG-IP updates and upgrades it is suggested to update Node.js Package Manager (NPM) modules. Follow this procedure to update NPM modules:
+1. Log in to BIG-IP CLI as a user with **Administrator** privileges
+2. Execute command `bash`
+3. Execute command `cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/`
+4. Execute command `npm update ldapjs`

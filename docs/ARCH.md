@@ -168,13 +168,14 @@ set ldap(bind_pwd) [ACCESS::session data get -secure "session.custom.ldap.bind_p
 set ldap(user_dn) [ACCESS::session data get "session.custom.ldap.user_dn"]
 set ldap(user_attr) [ACCESS::session data get "session.custom.ldap.user_attr"]
 set ldap(user_value) [ACCESS::session data get "session.custom.ldap.user_value"]
+set ldap(resolver) [ACCESS::session data get "session.custom.ldap.resolver"]
 ```
 
 More about implemented input variables and output data type you can find in [APM-LDAP-Modify.tcl](../iruleslx/APM-LDAP-Modify.tcl) file. File contains debug switch `set static::ldap_modify_debug` which allows you to check input variables using `/var/log/ltm` file. All errors will be delivered to **local0.error** automatically.
 
 ### APM-LDAP-Modify_ilx
 
-This iRule LX receives LDAP bind data and LDAP modify data from classic iRule. After successful LDAPS connection it modifies selected LDAP attribute with new value. This iRule LX assumes that LDAP URL will use **ldaps://** scheme and **636** port. Bind operation has special parameter **rejectUnauthorized=false** to allow connection to untrusted SSL servers. This iRule LX assumes that selected LDAP attribute is already present on LDAP user. Otherwise modify operation will fail
+This iRule LX receives LDAP bind data and LDAP modify data from classic iRule. After successful LDAPS connection it modifies selected LDAP attribute with new value. This iRule LX assumes that LDAP URL will use **ldaps://** scheme and **636** port. Bind operation has special parameter **rejectUnauthorized=false** to allow connection to untrusted SSL servers. This iRule LX assumes that selected LDAP attribute is already present on LDAP user. Otherwise modify operation will fail. For multitenant BIG-IP environments this iRule LX receives string with DNS servers that are able to resolve FQDN of the current LDAP host or domain.
 
 ```js
 const ldapBindScheme = req.params()[0];
@@ -185,6 +186,7 @@ const ldapBindPwd = req.params()[4];
 const ldapUserDn = req.params()[5];
 const ldapUserAttr = req.params()[6];
 const ldapUserSecret = req.params()[7];
+const ldapNameResolver = req.params()[8];
 ```
 
 More about implemented input variables and output data type you can find in [APM-LDAP-Modify.js](../iruleslx/APM-LDAP-Modify.js) file. File contains debug switch `const ldap_modify_debug` which allows you to check debug messages using `/var/log/ltm` file. All errors will be delivered to `/var/log/ltm` file automatically.

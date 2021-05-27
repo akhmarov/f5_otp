@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Verify_irule
-# Date:     June 2020
-# Version:  2.4
+# Date:     May 2021
+# Version:  2.5
 #
 # Authors:
 #   George Watkins
@@ -71,19 +71,25 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         set otp(security_period) [ACCESS::session data get "session.custom.otp.security_period"]
         set otp(security_delay) [ACCESS::session data get "session.custom.otp.security_delay"]
 
+        # Extract client IP from the request
+        set client [getfield [IP::client_addr] "%" 1]
+
+        # Retrieve session identifier from APM
+        set sid [ACCESS::session sid]
+
         if { [call OTP::check_input [array get otp] $static::otp_verify_apm_debug] } {
             # Extract decryption key from iFile
             set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
             if { [llength [split $secret_key]] != 3 } {
-                log local0.error "Encryption key has invalid format for client [IP::client_addr]"
+                log local0.err "Encryption key has invalid format for session $sid for client $client"
 
                 # Encryption key must be in format compatible with AES::decrypt.
                 # Set return code to "invalid input data from APM"
                 set verify_result 1
             } else {
                 if { [catch { b64decode $otp(secret_value) } {result}] } {
-                    log local0.error "Secret value has invalid format for client [IP::client_addr]"
+                    log local0.err "Secret value has invalid format for session $sid for client $client"
 
                     # Secret value must be in format compatible with b64decode.
                     # Set return code to "invalid input data from APM"
@@ -115,7 +121,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 }
             }
         } else {
-            log local0.error "Input data extracted from APM is invalid for client [IP::client_addr]"
+            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"

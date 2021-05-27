@@ -1,5 +1,6 @@
 'use strict';
 
+const dns = require('dns');
 const ldap = require('ldapjs');
 
 const ldapBindScheme = 'ldap://';
@@ -10,6 +11,7 @@ const ldapBindPwd = 'COMPLEX_PASSWORD_STRING';
 const ldapUserDn = 'CN=John S.,OU=User Accounts,DC=corp,DC=contoso,DC=com';
 const ldapUserAttr = 'extensionAttribute2';
 const ldapUserSecret = 'BASE64_STRING';
+const ldapNameResolver = '198.51.100.10|198.51.100.11';
 
 let ldapModifyRec = (hosts, ldapChange, i) => {
     return new Promise((resolve, reject) => {
@@ -66,6 +68,12 @@ let modifyNext = (records, ldapChange, i) => {
         }
     });
 };
+
+try {
+    dns.setServers(ldapNameResolver.split('|'));
+} catch (error) {
+    console.error('DNS config error: ' + error);
+}
 
 dns.resolve(ldapBindFqdn, (error, records) => {
     if (error) {

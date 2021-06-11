@@ -97,7 +97,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 9. Log in to BIG-IP CLI as a user with **Administrator** privileges
 10. Execute command `bash`
 11. Execute command `cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/`
-12. Execute command `npm install ldapjs --no-bin-links`
+12. Execute command `npm install ldapjs@1.0.2 --no-bin-links`
 13. Log in to BIG-IP GUI as a user with **Administrator** privileges
 14. Check that current partition is **Common**
 15. Go to *Local Traffic -> iRules -> LX Pugins*

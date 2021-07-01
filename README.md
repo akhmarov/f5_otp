@@ -47,4 +47,4 @@ Full list of persons that helped me located in [Credits](docs/CREDITS.md)
 
 ## Badges
 
-[![GitHub Super-Linter](https://github.com/akhmarov/f5_otp/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![GitHub Super-Linter](https://github.com/akhmarov/f5_otp/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)

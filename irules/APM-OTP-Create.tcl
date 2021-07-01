@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Create_irule
-# Date:     May 2021
-# Version:  2.5
+# Date:     June 2021
+# Version:  2.6
 #
 # Authors:
 #   Vladimir Akhmarov
@@ -55,15 +55,12 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         # Extract client IP from the request
         set client [getfield [IP::client_addr] "%" 1]
 
-        # Retrieve session identifier from APM
-        set sid [ACCESS::session sid]
-
         if { [call OTP::check_input [array get otp] $static::otp_create_debug] } {
             # Extract encryption key from iFile
             set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
             if { [llength [split $secret_key]] != 3 } {
-                log local0.err "Encryption key has invalid format for session $sid for client $client"
+                log local0.err "Encryption key has invalid format for session [ACCESS::session sid] for client $client"
 
                 # Encryption key must be in format compatible with AES::encrypt.
                 # Set return code to "invalid input data from APM"
@@ -73,7 +70,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 set secret_value_dec [call OTP::create_secret $otp(secret_hmac)]
 
                 if { [string length $secret_value_dec] == 0 } {
-                    log local0.err "Failed to create shared secret value for session $sid for client $client"
+                    log local0.err "Failed to create shared secret value for session [ACCESS::session sid] for client $client"
 
                     # Failed to create unencrypted shared secret value. Set
                     # return code to "invalid shared secret value"
@@ -83,7 +80,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                     set secret_value [b64encode [AES::encrypt $secret_key $secret_value_dec]]
 
                     if { [string length $secret_value] == 0 } {
-                        log local0.err "Failed to encode shared secret value for session $sid for client $client"
+                        log local0.err "Failed to encode shared secret value for session [ACCESS::session sid] for client $client"
 
                         # Failed to encode encrypted shared secret value. Set
                         # return code to "invalid shared secret value"
@@ -93,7 +90,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                         set issuer [URI::encode [lindex [split $otp(user_mail) "@"] 1]]
 
                         if { $issuer eq "" } {
-                            log local0.err "User has invalid email address for session $sid for client $client"
+                            log local0.err "User has invalid email address for session [ACCESS::session sid] for client $client"
 
                             # User mail has invalid format. Set return code to
                             # "invalid input data from APM"
@@ -115,7 +112,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 }
             }
         } else {
-            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
+            log local0.err "Input data extracted from APM is invalid for session [ACCESS::session sid] for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -141,6 +138,6 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         ACCESS::session data set -secure "session.custom.otp.qr_uri" $qr_uri
 
         # Secure unused variable
-        unset -- otp
+        unset -nocomplain -- otp
     }
 }

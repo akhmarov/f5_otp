@@ -1,7 +1,7 @@
 #
 # Name:     LTM-OTP-Verify_irule
-# Date:     May 2021
-# Version:  2.5
+# Date:     June 2021
+# Version:  2.6
 #
 # Authors:
 #   George Watkins
@@ -117,7 +117,7 @@ when HTTP_REQUEST priority 500 {
             }
 
             # Secure unused variable
-            unset -- otp
+            unset -nocomplain -- otp
         }
         default {
             log local0.err "Requested invalid URL for client $client"

@@ -117,8 +117,8 @@ SearchFilter = `sAMAccountName=%{session.logon.last.username}`
 Fetch Nested Groups = Enabled  
 Required Attributes: **dn**, **extensionAttribute2**, **mail**, **memberOf**, **sAMAccountName**  
 No Mail = `expr {[string trim [mcget {session.ad.last.attr.mail}]] eq ""}`  
-memberOf and OTP = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget {session.ad.last.attr.memberOf}]] && [mcget {session.ad.last.attr.extensionAttribute2}] ne ""}`  
-memberOf = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget {session.ad.last.attr.memberOf}]]}`  
+memberOf and OTP = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget -decode {session.ad.last.attr.memberOf}]] && [mcget {session.ad.last.attr.extensionAttribute2}] ne ""}`  
+memberOf = `expr {[string match {*CN=OTP_Allow,OU=Service Groups,DC=corp,DC=contoso,DC=com*} [mcget -decode {session.ad.last.attr.memberOf}]]}`  
 
 **Browser Mail**  
 Type = Message Box  

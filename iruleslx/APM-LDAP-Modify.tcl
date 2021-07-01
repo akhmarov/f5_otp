@@ -1,7 +1,7 @@
 #
 # Name:     APM-LDAP-Modify_irule
-# Date:     May 2021
-# Version:  2.6
+# Date:     June 2021
+# Version:  2.7
 #
 # Authors:
 #   Brett Smith
@@ -65,9 +65,6 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         # Extract client IP from the request
         set client [getfield [IP::client_addr] "%" 1]
 
-        # Retrieve session identifier from APM
-        set sid [ACCESS::session sid]
-
         if { [call OTP::check_input [array get ldap] $static::ldap_modify_debug] } {
             # Prepare iRules LX handler
             set ilx_handle [ILX::init $static::ldap_modify_ilx_plugin $static::ldap_modify_ilx_ext]
@@ -77,7 +74,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
             }
 
             if { [catch { ILX::call $ilx_handle -timeout $static::ldap_modify_ilx_time $static::ldap_modify_ilx_method $ldap(bind_scheme) $ldap(bind_fqdn) $ldap(bind_port) $ldap(bind_dn) $ldap(bind_pwd) $ldap(user_dn) $ldap(user_attr) $ldap(user_value) $ldap(resolver) } {result}] } {
-                log local0.err "ILX call failed \($result\) for session $sid for client $client"
+                log local0.err "ILX call failed \($result\) for session [ACCESS::session sid] for client $client"
 
                 # iRules LX handler execution failed. Set return code to "iRules
                 # LX call failed"
@@ -88,7 +85,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 set ldap_modify_result $result
             }
         } else {
-            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
+            log local0.err "Input data extracted from APM is invalid for session [ACCESS::session sid] for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -103,6 +100,6 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         ACCESS::session data set "session.custom.ldap.modify_result" $ldap_modify_result
 
         # Secure unused variable
-        unset -- ldap
+        unset -nocomplain -- ldap
     }
 }

@@ -1,7 +1,7 @@
 #
 # Name:     OTP
-# Date:     June 2020
-# Version:  2.4
+# Date:     June 2021
+# Version:  2.5
 #
 # Authors:
 #   George Watkins
@@ -14,7 +14,7 @@
 #   public standards described in "RFC 4226 - HMAC-Based One-Time Password
 #   (HOTP) algorithm" and "RFC 6238 - TOTP: Time-Based One-Time Password
 #   Algorithm". It supports Google Authenticator (GA) shared key length equal to
-#   80 bits also
+#   80 bits also. This library contains various proc helpers also
 #
 
 ################################################################################
@@ -63,10 +63,10 @@ proc create_secret {algo} {
             # Shared secret generation succeeded
             return $secret
         } else {
-            log local0.error "create_secret: Invalid length of shared secret ASCII string"
+            log local0.err "create_secret: Invalid length of shared secret ASCII string"
         }
     } else {
-        log local0.error "create_secret: Invalid input data"
+        log local0.err "create_secret: Invalid input data"
     }
 
     # Shared secret generation failed
@@ -125,7 +125,7 @@ proc create_hotp {algo secret digit counter} {
         # HMAC-based OTP creation succeeded
         return $otp
     } else {
-        log local0.error "create_hotp: Invalid input data"
+        log local0.err "create_hotp: Invalid input data"
     }
 
     # HMAC-based OTP creation failed
@@ -167,13 +167,13 @@ proc verify_hotp {algo secret digit otp counter} {
     set ga_len 80
 
     if { $algo eq "" || $secret eq "" || $digit eq "" || $otp eq "" || $counter eq "" } {
-        log local0.error "verify_hotp: Invalid input data"
+        log local0.err "verify_hotp: Invalid input data"
     } else {
         # Convert shared secret from ASCII string to binary string
         set secret [string map -nocase $b32ralpha $secret]
 
         if { [string length $secret] < $ga_len } {
-            log local0.error "verify_hotp: Invalid length of shared secret binary string"
+            log local0.err "verify_hotp: Invalid length of shared secret binary string"
         } else {
             if { [call OTP::create_hotp $algo $secret $digit $counter] eq $otp } {
                 # HMAC-based OTP is valid for presented counter
@@ -210,7 +210,7 @@ proc verify_hotp {algo secret digit otp counter} {
 
 proc verify_totp {algo secret digit otp step_size step_num} {
     if { $algo eq "" || $secret eq "" || $digit eq "" || $otp eq "" || $step_size eq "" || $step_num eq "" } {
-        log local0.error "verify_totp: Invalid input data"
+        log local0.err "verify_totp: Invalid input data"
     } else {
         # Get current time as number of time-step values
         set time_step [expr {[clock seconds] / $step_size}]
@@ -254,27 +254,23 @@ proc verify_totp {algo secret digit otp step_size step_num} {
 
 proc check_bruteforce {prefix user period attempt delay} {
     if { $prefix eq "" || $user eq "" || $period eq "" || $attempt eq "" || $delay eq "" } {
-        log local0.error "check_bruteforce: Invalid input data"
+        log local0.err "check_bruteforce: Invalid input data"
     } else {
-        # Extract number of user's failed attempts
-        set count [table lookup -notouch -- ${prefix}_otp_brute:${user}]
+        if { [table lookup -notouch -subtable {$prefix:$user:otp_brute} -- status] ne "LOCKED" } {
+            # Retrieve failed attempt identifier
+            set fail_id [table incr -subtable {$prefix:$user:otp_brute} -- fail_id]
 
-        if { $count eq "" } {
-            # Mark user's first failed attempt
-            table set -- ${prefix}_otp_brute:${user} 0 $period $period
+            # Add failed attempt identifier to the sliding window table
+            table set -subtable {$prefix:$user:otp_brute_wnd} -- $fail_id "FAILED" indefinite $period
 
-            # Bruteforce check passed
-            return true
-        } else {
-            if { $count < $attempt } {
-                # Increment number of user's failed attempts
-                table incr -notouch -- ${prefix}_otp_brute:${user}
-
+            if { [table keys -subtable {$prefix:$user:otp_brute_wnd} -count --] < $attempt } {
                 # Bruteforce check passed
                 return true
             } else {
-                # Lock out user for specified delay
-                table timeout -- ${prefix}_otp_brute:${user} $delay
+                # Lock out user for specified time
+                table set -subtable {$prefix:$user:otp_brute} -- status "LOCKED" $delay
+
+                log local0.info "check_bruteforce: Token for user $user from $prefix blocked for $delay seconds"
             }
         }
     }
@@ -288,8 +284,8 @@ proc check_bruteforce {prefix user period attempt delay} {
 #
 # Description:
 #   This procedure implements security check for One-Time Password (OTP)
-#   verification procedure. It checks if last OTP value for user was used only
-#   once
+#   verification procedure. It checks whether each OTP value was used only once
+#   during OTP lifetime
 #
 # Input:
 #   prefix - table name prefix
@@ -304,26 +300,27 @@ proc check_bruteforce {prefix user period attempt delay} {
 
 proc check_replay {prefix user period otp} {
     if { $prefix eq "" || $user eq "" || $period eq "" || $otp eq "" } {
-        log local0.error "check_replay: Invalid input data"
+        log local0.err "check_replay: Invalid input data"
     } else {
-        # Extract user's last used OTP value
-        set table_otp [table lookup -notouch -- ${prefix}_otp_replay:${user}]
+        if { [table keys -subtable {$prefix:$user:otp_replay_wnd} -count --] > 0 } {
+            foreach {table_otp} [table keys -subtable {$prefix:$user:otp_replay_wnd} --] {
+                if { $table_otp eq $otp } {
+                    log local0.info "check_replay: User $user from $prefix used expired OTP"
 
-        if { $table_otp eq "" } {
-            # Update user with last OTP value for specified period
-            table set -- ${prefix}_otp_replay:${user} $otp $period $period
-
-            # Anti-reply check passed
-            return true
-        } else {
-            if { $table_otp ne $otp } {
-                # Anti-reply check passed
-                return true
+                    # Anti-replay check failed
+                    return false
+                }
             }
         }
+
+        # Add current OTP value to the sliding window table
+        table set -subtable {$prefix:$user:otp_replay_wnd} -- $otp "USED" indefinite $period
+
+        # Anti-replay check passed
+        return true
     }
 
-    # Anti-reply check failed
+    # Anti-replay check failed
     return false
 }
 
@@ -350,7 +347,7 @@ proc check_input {var_array flag_debug} {
     # Initialize return value as TRUE
     set ret_value true
 
-    foreach var_name [array names vars] {
+    foreach {var_name} [array names vars] {
         if { [string trim $vars($var_name)] eq "" } {
             # Set return value as FALSE because array element is empty
             set ret_value false

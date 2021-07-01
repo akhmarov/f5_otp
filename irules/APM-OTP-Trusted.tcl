@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Trusted_irule
-# Date:     May 2021
-# Version:  2.5
+# Date:     June 2021
+# Version:  2.6
 #
 # Authors:
 #   Niels van Sluis
@@ -100,15 +100,12 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         # Extract client IP from the request
         set client [getfield [IP::client_addr] "%" 1]
 
-        # Retrieve session identifier from APM
-        set sid [ACCESS::session sid]
-
         if { [call OTP::check_input [array get otp] $static::otp_trusted_apm_debug] } {
             # Extract decryption key from iFile
             set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
             if { [llength [split $secret_key]] != 3 } {
-                log local0.err "Encryption key has invalid format for session $sid for client $client"
+                log local0.err "Encryption key has invalid format for session [ACCESS::session sid] for client $client"
 
                 # Encryption key must be in format compatible with
                 # AES::decrypt. Set return code to "invalid input data from
@@ -117,7 +114,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
             } else {
                 if { $otp(trusted_ckval) eq $static::otp_trusted_apm_ckval } {
                     if { $otp(trusted_flag) == 1 } {
-                        foreach attr $static::otp_trusted_apm_attr {
+                        foreach {attr} $static::otp_trusted_apm_attr {
                             # Append APM session value as attribute to the
                             # trusted device cookie
                             lappend trusted_ckval [ACCESS::session data get $attr]
@@ -144,7 +141,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                     set trusted_result 2
                 } else {
                     if { [catch { b64decode $otp(trusted_ckval) } {result}] } {
-                        log local0.err "Trusted device cookie is invalid for session $sid for client $client"
+                        log local0.err "Trusted device cookie is invalid for session [ACCESS::session sid] for client $client"
 
                         # Trusted device cookie value must be in format
                         # compatible with b64decode. Set return code to "trusted
@@ -159,7 +156,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                         }
 
                         if { [expr {[string range $trusted_ckval end-9 end] + $otp(trusted_cktime)}] < [clock seconds] } {
-                            log local0.err "Trusted device cookie was tampered for session $sid for client $client"
+                            log local0.err "Trusted device cookie was tampered for session [ACCESS::session sid] for client $client"
 
                             # Trusted device cookie value was tampered. Set
                             # return code to "trusted device cookie is invalid"
@@ -168,7 +165,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                             # Initialize match counter
                             set match_count 0
 
-                            foreach attr $static::otp_trusted_apm_attr {
+                            foreach {attr} $static::otp_trusted_apm_attr {
                                 if { [string match {*[ACCESS::session data get $attr]*} $trusted_ckval] } {
                                     # Increment match counter for each matching
                                     # APM attribute
@@ -183,7 +180,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                                 set trusted_result 0
                             } else {
                                 if { $static::otp_trusted_apm_debug == 1 } {
-                                    log local0.debug "New trusted device found for session $sid for client $client"
+                                    log local0.debug "New trusted device found for session [ACCESS::session sid] for client $client"
                                 }
 
                                 # Client environment has changed. Device must be
@@ -196,7 +193,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 }
             }
         } else {
-            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
+            log local0.err "Input data extracted from APM is invalid for session [ACCESS::session sid] for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -211,7 +208,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         ACCESS::session data set "session.custom.otp.trusted_result" $trusted_result
 
         # Secure unused variable
-        unset -- otp
+        unset -nocomplain -- otp
     }
 }
 
@@ -243,5 +240,5 @@ when HTTP_RESPONSE_RELEASE priority 500 {
     }
 
     # Secure unused variable
-    unset -- otp
+    unset -nocomplain -- otp
 }

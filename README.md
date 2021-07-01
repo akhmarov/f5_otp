@@ -23,7 +23,7 @@ Required systems for this application:
 * SMTP server
 * OTP-compatible generator
 
-\* - tested on versions 14.1.x, 15.0.x and 15.1.x
+\* - tested on versions 14.1.x, 15.0.x and 15.1.x (minimum version is 13.1.0)
 
 ## Installation
 

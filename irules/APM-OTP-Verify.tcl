@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Verify_irule
-# Date:     May 2021
-# Version:  2.5
+# Date:     June 2021
+# Version:  2.6
 #
 # Authors:
 #   George Watkins
@@ -74,22 +74,19 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         # Extract client IP from the request
         set client [getfield [IP::client_addr] "%" 1]
 
-        # Retrieve session identifier from APM
-        set sid [ACCESS::session sid]
-
         if { [call OTP::check_input [array get otp] $static::otp_verify_apm_debug] } {
             # Extract decryption key from iFile
             set secret_key [string trim [ifile get $otp(secret_keyfile)]]
 
             if { [llength [split $secret_key]] != 3 } {
-                log local0.err "Encryption key has invalid format for session $sid for client $client"
+                log local0.err "Encryption key has invalid format for session [ACCESS::session sid] for client $client"
 
                 # Encryption key must be in format compatible with AES::decrypt.
                 # Set return code to "invalid input data from APM"
                 set verify_result 1
             } else {
                 if { [catch { b64decode $otp(secret_value) } {result}] } {
-                    log local0.err "Secret value has invalid format for session $sid for client $client"
+                    log local0.err "Secret value has invalid format for session [ACCESS::session sid] for client $client"
 
                     # Secret value must be in format compatible with b64decode.
                     # Set return code to "invalid input data from APM"
@@ -121,7 +118,7 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
                 }
             }
         } else {
-            log local0.err "Input data extracted from APM is invalid for session $sid for client $client"
+            log local0.err "Input data extracted from APM is invalid for session [ACCESS::session sid] for client $client"
 
             # iRule received invalid data from APM. Set return code to "invalid
             # input data from APM"
@@ -136,6 +133,6 @@ when ACCESS_POLICY_AGENT_EVENT priority 500 {
         ACCESS::session data set "session.custom.otp.verify_result" $verify_result
 
         # Secure unused variable
-        unset -- otp
+        unset -nocomplain -- otp
     }
 }

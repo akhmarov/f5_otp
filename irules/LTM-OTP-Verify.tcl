@@ -1,7 +1,7 @@
 #
 # Name:     LTM-OTP-Verify_irule
-# Date:     June 2021
-# Version:  2.6
+# Date:     October 2022
+# Version:  2.7
 #
 # Authors:
 #   George Watkins
@@ -134,9 +134,13 @@ when HTTP_REQUEST priority 500 {
     if { $verify_result == 0 } {
         # OTP was successfully verified. Return "200 OK" to client
         HTTP::respond 200 noserver
+
+        return
     } else {
         # OTP was not verified. Return "403 X-Error-Code" with custom error code
         # value to client
         HTTP::respond 403 X-Error-Code $verify_result noserver
+
+        return
     }
 }

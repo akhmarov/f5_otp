@@ -1,7 +1,7 @@
 #
 # Name:     APM-OTP-Trusted_irule
-# Date:     June 2021
-# Version:  2.6
+# Date:     October 2022
+# Version:  2.7
 #
 # Authors:
 #   Niels van Sluis
@@ -63,6 +63,11 @@ when CLIENT_ACCEPTED priority 500 {
 }
 
 when HTTP_REQUEST priority 500 {
+    if { [HTTP::has_responded] } {
+        # Exit if HTTP respond was already issued
+        return
+    }
+
     if { [HTTP::method] eq "GET" && [HTTP::uri] starts_with $static::otp_trusted_apm_url } {
         # Set flag to skip processing of APM internal URL
         set skip_apm 1

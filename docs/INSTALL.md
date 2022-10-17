@@ -97,13 +97,15 @@ You can safely choose another directory services, like Apache Directory Server, 
 9. Log in to BIG-IP CLI as a user with **Administrator** privileges
 10. Execute command `bash`
 11. Execute command `cd /var/ilx/workspaces/Common/LDAP-Modify_space/extensions/APM-LDAP-Modify_ilx/`
-12. Execute command `npm install ldapjs@1.0.2 --no-bin-links`
+12. Execute command `npm install ldapjs@1.0.2 --no-bin-links --save`
 13. Log in to BIG-IP GUI as a user with **Administrator** privileges
 14. Check that current partition is **Common**
 15. Go to *Local Traffic -> iRules -> LX Pugins*
 16. Add new plugin with name **LDAP-Modify_plugin**
 17. Select **ilx-extension** from **Log Publisher**. More about **ilx-extension** may be found in [Jason Rahm's article on DevCentral](https://devcentral.f5.com/s/articles/irules-lx-logger-class-31941)
 18. Select **LDAP-Modify_space** from **From Workspace**
+19. Go to *Local Traffic -> iRules -> LX Pugins -> LDAP-Modify_plugin -> Extensions -> APM-LDAP-Modify_ilx*
+20. Add **500** to **Maximum Restarts**
 
 ## Create TMOS SMTP objects
 
@@ -170,7 +172,7 @@ You can safely choose another directory services, like Apache Directory Server, 
 6. Select file [qrcode.js](../ifiles/qrcode.js)
 7. Select **session** from **Secure Level**
 8. Navigate to **Edit File Properties** and select **JavaScript** from **Mime Type**
-9. Navigate to **Managed Access** and select checkbox for APM profile **/CONTOSO/APM-OTP-Create_access** under **Retain Public Access**
+9. Navigate to **Manage Access** and select checkbox for APM profile **/CONTOSO/APM-OTP-Create_access** under **Retain Public Access**
 10. Check that **Publicly Accessible URI** for file **qrcode.js** is **/public/share/qrcode.js**
 
 As you can see QR generator code is a pure JavaScipt code which is stored on BIG-IP and rendered in user's browser, so there were no external connections from OTP configuration portal or user's browser to Google servers, for example. This may be crucial for secure environments.

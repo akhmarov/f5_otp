@@ -1,7 +1,7 @@
 #
 # Name:     LTM-OTP-Verify_irule
 # Date:     October 2022
-# Version:  2.7
+# Version:  2.8
 #
 # Authors:
 #   George Watkins
@@ -46,6 +46,11 @@ when RULE_INIT priority 500 {
 }
 
 when HTTP_REQUEST priority 500 {
+    if { [HTTP::has_responded] } {
+        # See https://support.f5.com/csp/article/K23237429
+        return
+    }
+
     switch -- [string tolower [HTTP::path]] {
         "/otp_verify" {
             # Import variables from HTTP URI
